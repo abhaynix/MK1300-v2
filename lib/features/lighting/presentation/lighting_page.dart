@@ -19,7 +19,8 @@ class LightingPage extends StatefulWidget {
   State<LightingPage> createState() => _LightingPageState();
 }
 
-class _LightingPageState extends State<LightingPage> with SingleTickerProviderStateMixin {
+class _LightingPageState extends State<LightingPage>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late LightingState _localState;
   late AnimationController _animController;
   Map<int, Color> _animatedColors = {};
@@ -28,15 +29,34 @@ class _LightingPageState extends State<LightingPage> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initLocalState();
     _loadGeometries();
 
-    // 30 FPS animation ticker for responsive desktop preview
+    // Responsive animation ticker for local visualizer preview
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
     )..addListener(_onTick);
     _animController.repeat();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (!mounted) return;
+    // Stop animations when minimized or hidden to prevent unnecessary CPU usage
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      if (_animController.isAnimating) {
+        _animController.stop();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (!_animController.isAnimating) {
+        _animController.repeat();
+      }
+    }
   }
 
   void _initLocalState() {
@@ -87,6 +107,8 @@ class _LightingPageState extends State<LightingPage> with SingleTickerProviderSt
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _animController.removeListener(_onTick);
     _animController.dispose();
     super.dispose();
   }
@@ -181,6 +203,45 @@ class _LightingPageState extends State<LightingPage> with SingleTickerProviderSt
     });
   }
 
+  Future<void> _applyToHardware() async {
+    final service = widget.keyboardService;
+    if (!service.isConnected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot apply: Keyboard is disconnected'),
+          backgroundColor: AppTheme.accentRed,
+        ),
+      );
+      return;
+    }
+
+    final success = await service.applyLightingState(_localState);
+    if (!mounted) return;
+
+    if (success) {
+      setState(() {
+        _localState = _localState.copyWith(isPreviewDirty: false);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            service.isUsingMock
+                ? 'Applied to Simulated Hardware (Readback confirmed)'
+                : 'Applied to Physical Hardware',
+          ),
+          backgroundColor: AppTheme.accentGreen,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(service.lastSyncError ?? 'Failed to synchronize with hardware'),
+          backgroundColor: AppTheme.accentRed,
+        ),
+      );
+    }
+  }
+
   void _resetToDefaultPreview() {
     setState(() {
       _initLocalState();
@@ -235,7 +296,19 @@ class _LightingPageState extends State<LightingPage> with SingleTickerProviderSt
                       style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentPurple),
                     ),
                   ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
+                FilledButton.icon(
+                  icon: const Icon(Icons.check, size: 14),
+                  label: const Text('Apply to Device', style: TextStyle(fontSize: 12)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: _localState.isPreviewDirty
+                        ? AppTheme.accentCyan
+                        : AppTheme.surfaceLight,
+                    foregroundColor: _localState.isPreviewDirty ? Colors.black : Colors.white60,
+                  ),
+                  onPressed: _applyToHardware,
+                ),
+                const SizedBox(width: 8),
                 TextButton.icon(
                   icon: const Icon(Icons.refresh, size: 14),
                   label: const Text('Reset Preview', style: TextStyle(fontSize: 12)),

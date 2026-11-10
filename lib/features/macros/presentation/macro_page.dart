@@ -191,12 +191,39 @@ class _MacroPageState extends State<MacroPage> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Header: Name & Recording status
+                          // Header: Name, Playback Mode & Recording status
                           Row(
                             children: [
                               Text(
                                 'Macro: ${currentMacro.name}',
                                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 16),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.surfaceLight,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: AppTheme.panelBorder),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<int>(
+                                    value: currentMacro.loopMode,
+                                    dropdownColor: AppTheme.surfaceLight,
+                                    style: const TextStyle(fontSize: 12, color: Colors.white),
+                                    items: const [
+                                      DropdownMenuItem(value: 0, child: Text('Play Once')),
+                                      DropdownMenuItem(value: 1, child: Text('Loop until Release')),
+                                      DropdownMenuItem(value: 2, child: Text('Loop until Any Key')),
+                                      DropdownMenuItem(value: 3, child: Text('Toggle Loop')),
+                                    ],
+                                    onChanged: (mode) {
+                                      if (mode != null) {
+                                        setState(() => currentMacro.loopMode = mode);
+                                      }
+                                    },
+                                  ),
+                                ),
                               ),
                               const Spacer(),
                               ElevatedButton.icon(
@@ -436,10 +463,17 @@ class _MacroPageState extends State<MacroPage> {
   Future<void> _saveToHardware(KeyboardService service) async {
     setState(() => _isSaving = true);
     try {
-      await service.saveMacrosToKeyboard(service.macros);
+      final success = await service.saveMacrosToKeyboard(service.macros);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Macros successfully programmed to keyboard EEPROM!')),
+          SnackBar(
+            content: Text(success
+                ? (service.isUsingMock
+                    ? 'Macros saved to simulated EEPROM (Verified)'
+                    : 'Macros successfully programmed to keyboard EEPROM!')
+                : (service.lastSyncError ?? 'Failed to save macros')),
+            backgroundColor: success ? AppTheme.accentGreen : AppTheme.accentRed,
+          ),
         );
       }
     } finally {

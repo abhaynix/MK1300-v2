@@ -137,5 +137,67 @@ void main() {
       expect(blue.hue, closeTo(240.0, 0.1));
       expect(blue.toFirmwareBytes(), equals([170, 255, 255]));
     });
+
+    test('Exact HSV Angle Boundaries (0, 180, 359, 360 degrees)', () {
+      // 0 degrees -> Red
+      final h0 = HsvColor(hue: 0.0, saturation: 1.0, value: 1.0);
+      expect(h0.toRGB(), equals([255, 0, 0]));
+      expect(h0.toFirmwareBytes()[0], equals(0));
+
+      // 180 degrees -> Cyan
+      final h180 = HsvColor(hue: 180.0, saturation: 1.0, value: 1.0);
+      expect(h180.toRGB(), equals([0, 255, 255]));
+      expect(h180.toFirmwareBytes()[0], equals(128)); // round(180 * 255 / 360) = 128
+
+      // 359 degrees -> Near Red
+      final h359 = HsvColor(hue: 359.0, saturation: 1.0, value: 1.0);
+      final rgb359 = h359.toRGB();
+      expect(rgb359[0], equals(255));
+      expect(rgb359[1], equals(0));
+      expect(rgb359[2], inInclusiveRange(0, 10)); // tiny blue component
+      expect(h359.toFirmwareBytes()[0], equals(254)); // round(359 * 255 / 360) = 254
+
+      // 360 degrees normalized -> 0 degrees
+      final h360 = HsvColor.fromNormalized(hue: 360.0, saturation: 1.0, value: 1.0);
+      expect(h360.hue, equals(0.0));
+      expect(h360.toFirmwareBytes()[0], equals(0));
+    });
+
+    test('Full RGB to HSV and HSV to RGB Roundtrip for standard primaries', () {
+      final testColors = [
+        [255, 0, 0], // Red
+        [0, 255, 0], // Green
+        [0, 0, 255], // Blue
+        [255, 255, 0], // Yellow
+        [0, 255, 255], // Cyan
+        [255, 0, 255], // Magenta
+        [255, 255, 255], // White
+        [0, 0, 0], // Black
+        [128, 128, 128], // Gray
+      ];
+
+      for (final rgb in testColors) {
+        final hsv = HsvColor.fromRGB(rgb[0], rgb[1], rgb[2]);
+        final back = hsv.toRGB();
+        expect(back, equals(rgb), reason: 'Failed roundtrip for $rgb');
+      }
+    });
+
+    test('Exact Hex Alpha-Byte Conventions (#AARRGGBB vs #RRGGBB)', () {
+      // 6-digit hex assumes alpha = 1.0 (0xFF)
+      final hex6 = HsvColor.fromHex('#123456');
+      expect(hex6.alpha, equals(1.0));
+      expect(hex6.toARGB32() >> 24, equals(0xFF));
+
+      // 8-digit hex parses explicit alpha: #80123456 -> alpha = 128/255 = ~0.5
+      final hex8 = HsvColor.fromHex('#80123456');
+      expect(hex8.alpha, closeTo(128 / 255.0, 0.01));
+      expect((hex8.toARGB32() >> 24) & 0xFF, equals(128));
+
+      // Shorthand 3-digit: #F80 -> #FF8800
+      final hex3 = HsvColor.fromHex('#F80');
+      expect(hex3.toRGB(), equals([255, 136, 0]));
+      expect(hex3.alpha, equals(1.0));
+    });
   });
 }

@@ -14,6 +14,10 @@ class KeyboardVisualizer extends StatefulWidget {
   final ValueChanged<int>? onKeyColorPainted;
   final Map<int, Color>? animatedColors; // Dynamic preview colors (key index -> Color)
 
+  /// Optional pre-loaded geometries. When provided, skips async asset loading
+  /// (useful for tests where rootBundle is not available).
+  final List<KeyGeometry>? geometries;
+
   const KeyboardVisualizer({
     super.key,
     required this.keys,
@@ -22,6 +26,7 @@ class KeyboardVisualizer extends StatefulWidget {
     this.isCustomRgbMode = false,
     this.onKeyColorPainted,
     this.animatedColors,
+    this.geometries,
   });
 
   @override
@@ -35,7 +40,11 @@ class _KeyboardVisualizerState extends State<KeyboardVisualizer> {
   @override
   void initState() {
     super.initState();
-    _loadLayoutData();
+    if (widget.geometries != null && widget.geometries!.isNotEmpty) {
+      _geometries = widget.geometries!;
+    } else {
+      _loadLayoutData();
+    }
   }
 
   Future<void> _loadLayoutData() async {
@@ -183,49 +192,73 @@ class _KeyCapWidget extends StatelessWidget {
           ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            // Top indicator light line
-            Container(
-              height: 3,
-              width: 16,
-              decoration: BoxDecoration(
-                color: keyColor,
-                borderRadius: BorderRadius.circular(1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: keyColor.withValues(alpha: 0.8),
-                    blurRadius: 5,
-                  ),
-                ],
-              ),
-            ),
-            const Spacer(),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                mapping.newName.isNotEmpty ? mapping.newName : geometry.name,
-                style: TextStyle(
-                  color: isSelected ? AppTheme.accentCyan : AppTheme.keycapLegend,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            if (mapping.newName != geometry.name && mapping.newName.isNotEmpty)
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  geometry.name,
-                  style: TextStyle(
-                    color: AppTheme.keycapSubLegend.withValues(alpha: 0.6),
-                    fontSize: 8,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Top indicator light line
+                Container(
+                  height: 3,
+                  width: 16,
+                  decoration: BoxDecoration(
+                    color: keyColor,
+                    borderRadius: BorderRadius.circular(1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: keyColor.withValues(alpha: 0.8),
+                        blurRadius: 5,
+                      ),
+                    ],
                   ),
                 ),
+                const Spacer(),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    mapping.newName.isNotEmpty ? mapping.newName : geometry.name,
+                    style: TextStyle(
+                      color: isSelected ? AppTheme.accentCyan : AppTheme.keycapLegend,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                if (mapping.newName != geometry.name && mapping.newName.isNotEmpty)
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      geometry.name,
+                      style: TextStyle(
+                        color: AppTheme.keycapSubLegend.withValues(alpha: 0.6),
+                        fontSize: 8,
+                      ),
+                    ),
+                  ),
+                const Spacer(),
+              ],
+            ),
+            if (mapping.isPendingChange)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFB300),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xAAFFB300),
+                        blurRadius: 3,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            const Spacer(),
           ],
         ),
       ),

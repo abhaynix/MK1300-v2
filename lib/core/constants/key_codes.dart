@@ -176,6 +176,19 @@ class KeyCodes {
     KeyCodeItem(name: 'Lock Keyboard', code: 'LOCK_KB', langId: '80042', type: typeHardware, value1: 25, value2: 0, value3: 0),
   ];
 
+  /// Macro Trigger Keys (Slots M0 through M15)
+  static final List<KeyCodeItem> macroKeys = List.generate(
+    16,
+    (i) => KeyCodeItem(
+      name: 'M$i',
+      code: 'MACRO($i)',
+      type: typeMacro,
+      value1: i,
+      value2: 1,
+      value3: 0,
+    ),
+  );
+
   /// Resolves human-readable name from type and code parameters.
   static String resolveKeyName(int type, int code1, int code2, int code3) {
     if (type == typeMacro) {

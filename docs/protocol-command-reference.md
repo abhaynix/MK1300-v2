@@ -69,18 +69,38 @@ This document provides a comprehensive, bit-exact reference of all recovered USB
   - `Byte 2`: `0x0B` (Payload parameter length: 11 bytes)
   - `Byte 3`: `0x00`
   - `Byte 4`: `0x00`
-  - `Byte 5`: `type` (0 = Preset mode, 1 = Custom per-key RGB)
+  - `Byte 5`: `type` (1 = Standard lighting mode)
   - `Byte 6`: `0x00`
   - `Byte 7`: `mode` (Lighting mode index 0 to 21)
   - `Byte 8`: `brightness` (Level 0 to 4)
   - `Byte 9`: `speed` (Level 0 to 4)
-  - `Byte 10`: `direction` (1 = Horizontal/Inward, 2 = Vertical/Outward)
+  - `Byte 10`: `direction` (0 = Left/Top, 1 = Right/Bottom)
   - `Byte 11`: `colorMode` (0 = Dynamic Rainbow, 1 = Solid Color)
   - `Byte 12`: `0x00`
-  - `Byte 13`: `hue` ($0\text{--}255 \to 0\text{--}360^\circ$)
-  - `Byte 14`: `saturation` ($0\text{--}255 \to 0\text{--}100\%$)
-  - `Byte 15`: `value` ($0\text{--}255 \to 0\text{--}100\%$)
+  - `Byte 13`: `hue` ($0\text{--}255 \to 0\text{--}360^\circ$: `Math.floor(h / 360 * 255)`)
+  - `Byte 14`: `saturation` ($0\text{--}255 \to 0\text{--}100\%$: `Math.floor(s / 100 * 255)`)
+  - `Byte 15`: `value` ($0\text{--}255 \to 0\text{--}100\%$: `Math.floor(v / 100 * 255)`)
   - `Bytes 16..63`: `0x00` Padding
+
+### 3.3 Unsolicited Live Event Packet (`0xAA, 0xFA`)
+- **Direction**: Inbound (Keyboard Interrupt IN endpoint $\to$ Host)
+- **Header**:
+  - `Byte 0`: `0xAA` (170)
+  - `Byte 1`: `0xFA` (250)
+  - `Byte 2`: `0x09` (Payload length: 9 bytes)
+  - `Bytes 3..5`: `0x00` Padding
+- **Payload**:
+  - `Byte 6`: `type` (1)
+  - `Byte 7`: `mode` (0 to 21)
+  - `Byte 8`: `brightness` (0 to 4)
+  - `Byte 9`: `speed` (0 to 4)
+  - `Byte 10`: `direction` (0 or 1)
+  - `Byte 11`: `colorMode` (0 or 1)
+  - `Byte 12`: `h` ($0\text{--}255$)
+  - `Byte 13`: `s` ($0\text{--}255$)
+  - `Byte 14`: `v` ($0\text{--}255$)
+  - `Bytes 15..63`: `0x00` Padding
+- **Trigger**: Dispatched automatically by MCU when user changes lighting via onboard Fn shortcuts (e.g. `Fn + \`, `Fn + Enter`).
 
 ### 3.3 Single Key Remapping (`0x06, 0x10`)
 - **Request Structure**:

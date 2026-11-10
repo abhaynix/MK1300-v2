@@ -11,6 +11,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+MK1300-V21-0-0.exe
 
 # IntelliJ related
 *.iml

@@ -42,35 +42,73 @@ class KeyboardConfig {
 
 ## 2. Key Descriptor Model (`KeyMapping`)
 
-Represents the physical and logical configuration of a single key on the keyboard:
+Represents the physical and logical configuration of a single key on the keyboard, with explicit tracking of factory defaults, hardware-confirmed state, and local pending changes:
 
 ```dart
 class KeyMapping {
-  final int keyIndex;       // Physical matrix index (0 to 126; 0 to 73 on 61-key layout)
-  final String keyName;     // Default keycap legend (e.g. "Esc", "W", "Space")
+  final int keyIndex;       // Physical matrix index (0 to 73 on 61-key layout)
+  final String defaultName; // Default physical key legend (e.g. "Esc", "W", "Space")
   final int defaultCode;    // Default HID usage code
-  final int defaultType;    // Default type (usually 32 for standard key)
-  
-  // Custom assigned state
-  int newType;              // Remapped Category Type (32=Key, 48=Media, 16=Mouse, 96=Macro, etc.)
-  int newCode1;             // Modifiers / Sub-category
-  int newCode2;             // Remapped HID keycode or action ID
-  int newCode3;             // Macro loop mode / wheel delta
-  String newName;           // Display label for remapped action
-  String colorHex;          // Custom RGB color (#RRGGBB)
+  final int defaultType;    // Default type (32 for standard key)
 
-  KeyMapping({
-    required this.keyIndex,
-    required this.keyName,
-    required this.defaultCode,
-    required this.defaultType,
-    required this.newType,
-    required this.newCode1,
-    required this.newCode2,
-    required this.newCode3,
-    required this.newName,
-    required this.colorHex,
-  });
+  // Hardware-confirmed state
+  int confirmedType;
+  int confirmedCode1;
+  int confirmedCode2;
+  int confirmedCode3;
+  String confirmedName;
+
+  // Local pending state
+  int newType;
+  int newCode1;
+  int newCode2;
+  int newCode3;
+  String newName;
+
+  String colorHex; // Custom RGB color (#RRGGBB)
+
+  bool get isPendingChange =>
+      newType != confirmedType ||
+      newCode1 != confirmedCode1 ||
+      newCode2 != confirmedCode2 ||
+      newCode3 != confirmedCode3;
+
+  bool get isModifiedFromDefault =>
+      newType != defaultType ||
+      newCode2 != defaultCode;
+
+  RemapCategory get category => RemapCategory.fromType(newType);
+
+  void assignAction(KeyRemapAction action);
+  void assignManual({required int type, required int code1, required int code2, required int code3, required String name});
+  void updateFromHardware({required int type, required int code1, required int code2, required int code3, required String name});
+  void confirmPending();
+  void revertPending();
+  void resetToDefault();
+}
+```
+
+### 2.1 Remapping Action & Catalog Models
+```dart
+class KeyRemapAction {
+  final String name;
+  final String code;
+  final RemapCategory category;
+  final int type;
+  final int value1;
+  final int value2;
+  final int value3;
+}
+
+class KeyCatalog {
+  static List<KeyRemapAction> get basicActions;
+  static List<KeyRemapAction> get mediaActions;
+  static List<KeyRemapAction> get mouseActions;
+  static List<KeyRemapAction> get shortcutActions;
+  static List<KeyRemapAction> get hardwareActions;
+  static List<KeyRemapAction> get macroActions;
+  static List<KeyRemapAction> get allActions;
+  static List<KeyRemapAction> search(String query, {RemapCategory? category});
 }
 ```
 

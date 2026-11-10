@@ -98,17 +98,17 @@ class _AppShellState extends State<AppShell> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'ANT ESPORTS MK1300 V2',
+                    'Ant Esports MK1300 V2',
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      letterSpacing: 1.2,
-                      color: Colors.white,
+                      letterSpacing: 0.2,
+                      color: AppTheme.textPrimary,
                     ),
                   ),
                   Text(
-                    '61-Key ARGB Mechanical Gaming Software',
-                    style: TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                    '61-key mechanical keyboard software',
+                    style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
                   ),
                 ],
               ),
@@ -116,20 +116,16 @@ class _AppShellState extends State<AppShell> {
           ),
           const Spacer(),
 
-          // Connection status badge
+          // Connection status badge (ChaiUI outline-only status)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: isConnected
-                  ? (service.isUsingMock
-                      ? AppTheme.accentCyan.withValues(alpha: 0.15)
-                      : AppTheme.accentGreen.withValues(alpha: 0.15))
-                  : AppTheme.accentRed.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isConnected
-                    ? (service.isUsingMock ? AppTheme.accentCyan : AppTheme.accentGreen)
-                    : AppTheme.accentRed,
+                    ? (service.isUsingMock ? AppTheme.highlightCream.withValues(alpha: 0.5) : AppTheme.accentGreen.withValues(alpha: 0.5))
+                    : AppTheme.accentRed.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
@@ -138,21 +134,21 @@ class _AppShellState extends State<AppShell> {
               children: [
                 Icon(
                   Icons.circle,
-                  size: 8,
+                  size: 6,
                   color: isConnected
-                      ? (service.isUsingMock ? AppTheme.accentCyan : AppTheme.accentGreen)
+                      ? (service.isUsingMock ? AppTheme.highlightCream : AppTheme.accentGreen)
                       : AppTheme.accentRed,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   service.isUsingMock
-                      ? 'SIMULATED DEVICE (OFFLINE)'
-                      : (isConnected ? 'PHYSICAL KEYBOARD (USB)' : 'DISCONNECTED'),
+                      ? 'Simulated device (offline)'
+                      : (isConnected ? 'Physical keyboard (USB)' : 'Disconnected'),
                   style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
                     color: isConnected
-                        ? (service.isUsingMock ? AppTheme.accentCyan : AppTheme.accentGreen)
+                        ? (service.isUsingMock ? AppTheme.highlightCream : AppTheme.accentGreen)
                         : AppTheme.accentRed,
                   ),
                 ),
@@ -301,14 +297,14 @@ class _AppShellState extends State<AppShell> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: InkWell(
         onTap: () => setState(() => _selectedNavIndex = index),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.accentCyan.withValues(alpha: 0.15) : Colors.transparent,
-            borderRadius: BorderRadius.circular(6),
+            color: isSelected ? const Color(0x0FFFFFFF) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? AppTheme.accentCyan.withValues(alpha: 0.6) : Colors.transparent,
+              color: isSelected ? AppTheme.panelBorder : Colors.transparent,
             ),
           ),
           child: Row(
@@ -318,13 +314,13 @@ class _AppShellState extends State<AppShell> {
                 width: 18,
                 height: 18,
                 colorFilter: ColorFilter.mode(
-                  isSelected ? AppTheme.accentCyan : AppTheme.textMuted,
+                  isSelected ? AppTheme.highlightCream : AppTheme.textMuted,
                   BlendMode.srcIn,
                 ),
                 errorBuilder: (context, error, stackTrace) => Icon(
                   fallbackIcon,
                   size: 18,
-                  color: isSelected ? AppTheme.accentCyan : AppTheme.textMuted,
+                  color: isSelected ? AppTheme.highlightCream : AppTheme.textMuted,
                 ),
               ),
               const SizedBox(width: 12),
@@ -332,8 +328,8 @@ class _AppShellState extends State<AppShell> {
                 title,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: isSelected ? Colors.white : AppTheme.textMuted,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? AppTheme.textPrimary : AppTheme.textMuted,
                 ),
               ),
             ],

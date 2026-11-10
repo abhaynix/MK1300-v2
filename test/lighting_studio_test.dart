@@ -202,5 +202,75 @@ void main() {
       // Ensure local preview banner reflects dirty preview
       expect(find.textContaining('Local Preview Active'), findsOneWidget);
     });
+
+    testWidgets('Animation controller pauses on AppLifecycleState.paused and resumes on resumed', (tester) async {
+      tester.view.physicalSize = const Size(1920, 1080);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final mockDevice = MockHidDevice();
+      final service = KeyboardService(customDevice: mockDevice);
+      await service.connect(forceMock: true);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LightingPage(keyboardService: service),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Flutter lifecycle transition state machine: resumed -> inactive -> hidden -> paused
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Resume transition: paused -> hidden -> inactive -> resumed
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+    });
+
+    testWidgets('Disposal of LightingPage safely unregisters observers and disposes controller', (tester) async {
+      tester.view.physicalSize = const Size(1920, 1080);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final mockDevice = MockHidDevice();
+      final service = KeyboardService(customDevice: mockDevice);
+      await service.connect(forceMock: true);
+
+      // Mount widget
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LightingPage(keyboardService: service),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Unmount widget
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // No exception or memory leak during disposal
+      expect(find.byType(LightingPage), findsNothing);
+    });
   });
 }

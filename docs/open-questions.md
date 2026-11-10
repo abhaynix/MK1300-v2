@@ -58,6 +58,16 @@ This document catalogs technical ambiguities, hardware-specific unknowns, and pr
 - **Status**: **SIMULATION VERIFIED**
 - **Details**: `LightingPreviewEngine` provides a mathematical desktop simulation of the 22 lighting modes for interactive local previewing. Because physical MCU PWM frequency, step interpolation curves, and LED diffusion optics cannot be measured without the physical keyboard, local preview behavior is classified as an approximation of the physical hardware visual output.
 
+### 2.7 Key Remapping Fn Layer Secondary Defaults
+- **Status**: **INFERRED**
+- **Details**: The default mappings for the Fn Layer (`Layer 1`) in `KeyMapping.fromGeometry(..., layer: 1)` (such as `1`..`0` -> `F1`..`F10`, `W` -> `Up`, `Esc` -> `` ` ``) are inferred from standard 60% compact keyboard firmware conventions and project documentation. The recovered vendor Electron application dynamically queried layer mappings from the device upon initialization rather than hardcoding static fallbacks.
+- **Action Required**: Once physical hardware is connected, read back raw factory Layer 1 tables via `CMD 0x06, 0x08` to verify factory secondary assignments.
+
+### 2.8 Hardware Function Key Type Collision
+- **Status**: **KNOWN LIMITATION / AMBIGUITY**
+- **Details**: In recovered key catalog data, Hardware Function keys (category 54, type `31` / `0x1F`) have collisions on `value1` (e.g. Brightness + and Light Effect mode switch both declare `value1: 1`). The original JavaScript vendor application relied on separate internal catalog identifiers before wire packet serialization.
+- **Action Required**: Verify how the Vision 9520 MCU distinguishes hardware function subcodes when receiving `CMD 0x06, 0x10` with type `31`.
+
 ---
 
 ## 3. Firmware Flashing & ISP Protocol (Flagged Unsafe / Excluded)

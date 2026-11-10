@@ -240,7 +240,7 @@ class DashboardPage extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.panelBorder),
       ),
       child: Row(
@@ -248,10 +248,11 @@ class DashboardPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: badgeColor.withValues(alpha: 0.15),
+              color: Colors.transparent,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.panelBorder),
             ),
-            child: Icon(icon, color: badgeColor, size: 24),
+            child: Icon(icon, color: badgeColor, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -264,7 +265,7 @@ class DashboardPage extends StatelessWidget {
                     Expanded(
                       child: Text(
                         title,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textPrimary),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -272,7 +273,7 @@ class DashboardPage extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: badgeColor.withValues(alpha: 0.15),
+                        color: Colors.transparent,
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(color: badgeColor.withValues(alpha: 0.4), width: 1),
                       ),
@@ -280,8 +281,9 @@ class DashboardPage extends StatelessWidget {
                         badgeText,
                         style: TextStyle(
                           fontSize: 9,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           color: badgeColor,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),

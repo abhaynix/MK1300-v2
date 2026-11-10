@@ -40,6 +40,9 @@ class PacketBuilder {
   }
 
   /// Constructs CMD 0x06, Sub 0x0B (Set Active Lighting Config)
+  /// Byte 8: Type, Byte 9: Reserved (0), Byte 10: Mode (0-21), Byte 11: Brightness (0-4),
+  /// Byte 12: Speed (0-4), Byte 13: Direction (0-1), Byte 14: ColorMode (0-1), Byte 15: Reserved (0),
+  /// Byte 16: H (0-255), Byte 17: S (0-255), Byte 18: V (0-255).
   static Uint8List buildSetLightingPacket({
     required int type,
     required int mode,
@@ -48,31 +51,35 @@ class PacketBuilder {
     required int direction,
     required int colorMode,
     required Color color,
+    int? customHByte,
+    int? customSByte,
+    int? customVByte,
   }) {
+    // Math.floor(h / 360 * 255) as recovered from upstream Electron source
     final hsv = ColorUtils.toFirmwareHsv(color);
-    final int h = hsv[0];
-    final int s = hsv[1];
-    final int v = hsv[2];
+    final int h = customHByte ?? hsv[0];
+    final int s = customSByte ?? hsv[1];
+    final int v = customVByte ?? hsv[2];
 
     final int effectiveColorMode = (mode == 0) ? 0 : colorMode;
 
     return ByteBufferUtils.createReportPayload([
-      UsbConstants.rootOpcode,
-      0x0B,
-      0x0B, // Payload length (11 bytes)
-      0x00,
-      0x00,
-      type,
-      0x00,
-      mode,
-      brightness,
-      speed,
-      direction,
-      effectiveColorMode,
-      0x00,
-      h,
-      s,
-      v,
+      UsbConstants.rootOpcode, // 0x06 (Byte 0)
+      0x0B,                   // Subcommand 0x0B (Byte 1)
+      0x0B,                   // Payload length (11 bytes) (Byte 2)
+      0x00,                   // Reserved (Byte 3)
+      0x00,                   // Reserved (Byte 4)
+      type,                   // Type (Byte 5)
+      0x00,                   // Reserved (Byte 6)
+      mode,                   // Mode (Byte 7)
+      brightness,             // Brightness (Byte 8)
+      speed,                  // Speed (Byte 9)
+      direction,              // Direction (Byte 10)
+      effectiveColorMode,     // Color mode (Byte 11)
+      0x00,                   // Single color index / Reserved (Byte 12)
+      h,                      // Hue (Byte 13)
+      s,                      // Saturation (Byte 14)
+      v,                      // Value (Byte 15)
     ]);
   }
 
@@ -323,6 +330,9 @@ class PacketBuilder {
   /// Parses response to CMD 0x06, Sub 0x0A into [LightingConfig].
   static LightingConfig? parseLightingResponse(Uint8List response) {
     if (response.length < 16) return null;
+    if (response[0] != UsbConstants.rootOpcode || response[1] != 0x0A) {
+      return null;
+    }
     final type = response[5];
     final modeVal = response[7];
     final brightness = response[8];
@@ -339,17 +349,29 @@ class PacketBuilder {
       orElse: () => LightingMode.staticOn,
     );
 
+    // Math.floor formula recovered from upstream Electron source
     return LightingConfig(
       type: type,
       mode: mode,
-      brightness: brightness,
-      speed: speed,
-      direction: direction,
-      colorMode: colorMode,
+      brightness: brightness.clamp(0, 4),
+      speed: speed.clamp(0, 4),
+      direction: direction.clamp(0, 1),
+      colorMode: colorMode.clamp(0, 1),
       singleColorIndex: singleColorIdx,
       hue: (360.0 * hByte / 255.0).clamp(0.0, 360.0),
       saturation: (100.0 * sByte / 255.0).clamp(0.0, 100.0),
       value: (100.0 * vByte / 255.0).clamp(0.0, 100.0),
     );
+  }
+
+  /// Parses response to CMD 0x06, Sub 0x08 into raw key descriptor chunk payload.
+  /// Expects a 64-byte report starting with [0x06, 0x08, ...].
+  /// Returns 56 bytes payload starting at offset 8, or null if invalid.
+  static Uint8List? parseKeymapChunkResponse(Uint8List response) {
+    if (response.length < 64) return null;
+    if (response[0] != UsbConstants.rootOpcode || response[1] != 0x08) {
+      return null;
+    }
+    return response.sublist(8);
   }
 }

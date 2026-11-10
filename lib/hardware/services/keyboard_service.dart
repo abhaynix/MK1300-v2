@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
-import '../../core/constants/usb_constants.dart';
+import '../../core/constants/key_codes.dart';
 import '../../core/utils/color_utils.dart';
+import '../../core/utils/hsv_color.dart';
 import '../../features/device/models/keyboard_config.dart';
 import '../../features/key_remapping/models/key_geometry.dart';
 import '../../features/key_remapping/models/key_mapping.dart';
 import '../../features/lighting/models/lighting_config.dart';
 import '../../features/lighting/models/lighting_mode.dart';
+import '../../features/lighting/models/lighting_state.dart';
+import '../../features/lighting/services/unsolicited_event_decoder.dart';
 import '../../features/macros/models/macro_model.dart';
 import '../../features/macros/services/macro_compiler.dart';
 import '../hid/device_connection_state.dart';
@@ -30,21 +33,28 @@ class KeyboardService extends ChangeNotifier {
 
   KeyboardConfig? _config;
   LightingConfig? _lightingConfig;
+  LightingState? _confirmedLightingState;
+  bool _isHardwareWriteGated = true; // Safety gate: physical writes blocked until verified
+  String? _lastSyncError;
   int _activeLayer = 0; // 0 = Main, 1 = Fn
   int _selectedKeyIndex = 0;
 
   // Key mappings for both layers
-  final List<KeyMapping> _layer0 = KeyGeometry.layout61.map((g) => KeyMapping.fromGeometry(g)).toList();
-  final List<KeyMapping> _layer1 = KeyGeometry.layout61.map((g) => KeyMapping.fromGeometry(g)).toList();
+  final List<KeyMapping> _layer0 = KeyGeometry.layout61.map((g) => KeyMapping.fromGeometry(g, layer: 0)).toList();
+  final List<KeyMapping> _layer1 = KeyGeometry.layout61.map((g) => KeyMapping.fromGeometry(g, layer: 1)).toList();
 
   // Macros
   List<MacroModel> _macros = List.generate(16, (i) => MacroModel(name: 'M$i', actions: []));
+  final bool _hasCustomDevice;
 
   KeyboardService({HidDevice? customDevice})
-      : _device = customDevice ?? MockHidDevice() {
+      : _hasCustomDevice = (customDevice != null),
+        _device = customDevice ?? MockHidDevice() {
     _commandQueue = CommandQueue(_device);
-    if (customDevice is MockHidDevice) {
+    if (customDevice is MockHidDevice || customDevice == null) {
       _isUsingMock = true;
+    } else {
+      _isUsingMock = false;
     }
   }
 
@@ -57,12 +67,20 @@ class KeyboardService extends ChangeNotifier {
   int get batteryLevel => (_device is MockHidDevice) ? (_device as MockHidDevice).batteryLevel : 100;
   KeyboardConfig? get config => _config;
   LightingConfig? get lightingConfig => _lightingConfig;
+  LightingState? get confirmedLightingState => _confirmedLightingState;
+  bool get isHardwareWriteGated => _isHardwareWriteGated;
+  String? get lastSyncError => _lastSyncError;
   int get activeLayer => _activeLayer;
   int get selectedKeyIndex => _selectedKeyIndex;
   List<KeyMapping> get currentKeys => (_activeLayer == 1) ? _layer1 : _layer0;
   List<KeyMapping> get layer0Keys => _layer0;
   List<KeyMapping> get layer1Keys => _layer1;
   List<MacroModel> get macros => _macros;
+
+  int get pendingRemapCount => currentKeys.where((k) => k.isPendingChange).length;
+  bool get hasPendingRemaps => pendingRemapCount > 0;
+  int get pendingRemapCountLayer0 => _layer0.where((k) => k.isPendingChange).length;
+  int get pendingRemapCountLayer1 => _layer1.where((k) => k.isPendingChange).length;
 
   KeyMapping? get selectedKey {
     if (_selectedKeyIndex >= 0 && _selectedKeyIndex < currentKeys.length) {
@@ -90,27 +108,29 @@ class KeyboardService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (!forceMock) {
-        _connectionState = DeviceConnectionState.searching;
-        notifyListeners();
-        final physicalDevices = LinuxHidDevice.enumerateDevices();
-        if (physicalDevices.isNotEmpty) {
-          _connectionState = DeviceConnectionState.connecting;
+      if (!_hasCustomDevice) {
+        if (!forceMock) {
+          _connectionState = DeviceConnectionState.searching;
           notifyListeners();
-          await _device.close();
-          _device = physicalDevices.first;
-          _commandQueue = CommandQueue(_device);
-          _isUsingMock = false;
+          final physicalDevices = LinuxHidDevice.enumerateDevices();
+          if (physicalDevices.isNotEmpty) {
+            _connectionState = DeviceConnectionState.connecting;
+            notifyListeners();
+            await _device.close();
+            _device = physicalDevices.first;
+            _commandQueue = CommandQueue(_device);
+            _isUsingMock = false;
+          } else {
+            // No physical keyboard found, use Mock device
+            _device = MockHidDevice();
+            _commandQueue = CommandQueue(_device);
+            _isUsingMock = true;
+          }
         } else {
-          // No physical keyboard found, use Mock device
           _device = MockHidDevice();
           _commandQueue = CommandQueue(_device);
           _isUsingMock = true;
         }
-      } else {
-        _device = MockHidDevice();
-        _commandQueue = CommandQueue(_device);
-        _isUsingMock = true;
       }
 
       final opened = await _device.open();
@@ -159,12 +179,8 @@ class KeyboardService extends ChangeNotifier {
       _config = PacketBuilder.parseConfigResponse(cfgResp);
     }
 
-    // 2. Get Lighting Config
-    final lightPacket = PacketBuilder.buildGetLightingPacket();
-    final lightResp = await _commandQueue.writeAndReadCommand(lightPacket);
-    if (lightResp != null) {
-      _lightingConfig = PacketBuilder.parseLightingResponse(lightResp);
-    }
+    // 2. Get Lighting Config (CMD 0x06, Sub 0x0A)
+    await readLightingConfig();
 
     // 3. Read Key Mappings for Layer 0 & 1
     await _readKeyLayoutFromDevice(0);
@@ -177,16 +193,115 @@ class KeyboardService extends ChangeNotifier {
     await _readMacrosFromDevice();
   }
 
-  void _handleHardwareEvent(Uint8List report) {
-    if (report.length >= 16 &&
-        report[0] == UsbConstants.eventHeaderByte0 &&
-        report[1] == UsbConstants.eventHeaderByte1) {
-      final updatedLight = PacketBuilder.parseLightingResponse(report);
-      if (updatedLight != null) {
-        _lightingConfig = updatedLight;
-        notifyListeners();
+  /// Safely reads the active lighting configuration from the device (CMD 0x06, Sub 0x0A).
+  /// Updates `_lightingConfig` and `_confirmedLightingState`.
+  Future<bool> readLightingConfig() async {
+    try {
+      final lightPacket = PacketBuilder.buildGetLightingPacket();
+      final lightResp = await _commandQueue.writeAndReadCommand(lightPacket);
+      if (lightResp != null && lightResp.length >= 16) {
+        final parsed = PacketBuilder.parseLightingResponse(lightResp);
+        if (parsed != null) {
+          _lightingConfig = parsed;
+          _confirmedLightingState = LightingState(
+            mode: parsed.mode,
+            brightness: parsed.brightness,
+            speed: parsed.speed,
+            direction: parsed.direction,
+            colorMode: parsed.colorMode,
+            selectedColor: HsvColor.fromNormalized(
+              hue: parsed.hue,
+              saturation: parsed.saturation / 100.0,
+              value: parsed.value / 100.0,
+            ),
+            customSwatches: List.from(ColorUtils.presetPalette),
+            perKeyColors: const {},
+            isCustomMode: false,
+            isPreviewDirty: false,
+          );
+          _lastSyncError = null;
+          notifyListeners();
+          return true;
+        }
       }
+      _lastSyncError = 'Invalid lighting response from device';
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _lastSyncError = 'Failed to read lighting configuration: $e';
+      notifyListeners();
+      return false;
     }
+  }
+
+  void _handleHardwareEvent(Uint8List report) {
+    final event = UnsolicitedEventDecoder.decode(report);
+    if (event is UnsolicitedLightingEvent) {
+      _lightingConfig = LightingConfig(
+        type: event.hardwareType,
+        mode: event.mode,
+        brightness: event.brightness,
+        speed: event.speed,
+        direction: event.direction,
+        colorMode: event.colorMode,
+        singleColorIndex: 0,
+        hue: event.hsv.hue,
+        saturation: event.hsv.saturation * 100.0,
+        value: event.hsv.value * 100.0,
+      );
+      _confirmedLightingState = event.toLightingState();
+      notifyListeners();
+    }
+  }
+
+  /// Applies a lighting state to the hardware (CMD 0x06, Sub 0x0B).
+  /// Strictly respects the physical write safety gate and verifies mock writes.
+  Future<bool> applyLightingState(LightingState state) async {
+    if (!_isConnected) {
+      _lastSyncError = 'Device is disconnected';
+      notifyListeners();
+      return false;
+    }
+
+    // Safety Gate Check: Physical writes remain disabled until physical verification
+    if (!_isUsingMock && _isHardwareWriteGated) {
+      _lastSyncError = 'Physical hardware writes are currently gated pending hardware verification';
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      final packet = PacketBuilder.buildSetLightingPacket(
+        type: 1,
+        mode: state.mode.value,
+        brightness: state.brightness,
+        speed: state.speed,
+        direction: state.direction,
+        colorMode: state.colorMode,
+        color: state.color,
+      );
+
+      final success = await _commandQueue.sendCommand(packet);
+      if (success) {
+        // Read back hardware state to confirm
+        await readLightingConfig();
+        return true;
+      } else {
+        _lastSyncError = 'Failed to send lighting command';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _lastSyncError = 'Error synchronizing lighting: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Toggles the safety gate for testing physical hardware writes.
+  void setHardwareWriteGated(bool gated) {
+    _isHardwareWriteGated = gated;
+    notifyListeners();
   }
 
   // -------------------------------------------------------------
@@ -270,34 +385,202 @@ class KeyboardService extends ChangeNotifier {
   // Key Remapping Actions
   // -------------------------------------------------------------
 
-  Future<void> remapKey(int keyIndex, {
+  /// Assigns a new remapping to the key at [keyIndex] locally in active layer.
+  /// Does NOT write to hardware until [applyKeyRemap] or [applyAllPendingRemaps] is called.
+  void assignKeyRemap(int keyIndex, {
     required int type,
     required int code1,
     required int code2,
     required int code3,
     required String newName,
-  }) async {
+  }) {
     final list = currentKeys;
     if (keyIndex < 0 || keyIndex >= list.length) return;
 
     final key = list[keyIndex];
-    key.newType = type;
-    key.newCode1 = code1;
-    key.newCode2 = code2;
-    key.newCode3 = code3;
-    key.newName = newName;
-    notifyListeners();
-
-    // Fast single-key hardware write
-    final packet = PacketBuilder.buildWriteSingleKeyPacket(
-      keyIndex: key.keyIndex,
-      layer: _activeLayer,
+    key.assignManual(
       type: type,
       code1: code1,
       code2: code2,
       code3: code3,
+      name: newName,
     );
-    await _commandQueue.sendCommand(packet);
+    notifyListeners();
+  }
+
+  /// Assigns a catalog action to the key at [keyIndex] locally in active layer.
+  void assignKeyAction(int keyIndex, KeyRemapAction action) {
+    final list = currentKeys;
+    if (keyIndex < 0 || keyIndex >= list.length) return;
+
+    final key = list[keyIndex];
+    key.assignAction(action);
+    notifyListeners();
+  }
+
+  /// Backward-compatible remapKey method: updates local pending state and, if [autoApply] is true,
+  /// attempts to commit to hardware respecting the safety gate.
+  Future<bool> remapKey(int keyIndex, {
+    required int type,
+    required int code1,
+    required int code2,
+    required int code3,
+    required String newName,
+    bool autoApply = false,
+  }) async {
+    assignKeyRemap(
+      keyIndex,
+      type: type,
+      code1: code1,
+      code2: code2,
+      code3: code3,
+      newName: newName,
+    );
+
+    if (autoApply) {
+      return await applyKeyRemap(keyIndex);
+    }
+    return true;
+  }
+
+  /// Applies a single key remap to hardware (CMD 0x06, Sub 0x10).
+  /// Strictly checks safety gate when running against physical hardware.
+  Future<bool> applyKeyRemap(int keyIndex) async {
+    final list = currentKeys;
+    if (keyIndex < 0 || keyIndex >= list.length) return false;
+
+    final key = list[keyIndex];
+
+    if (!_isConnected) {
+      _lastSyncError = 'Device is disconnected';
+      notifyListeners();
+      return false;
+    }
+
+    if (!_isUsingMock && _isHardwareWriteGated) {
+      _lastSyncError = 'Physical hardware writes are currently gated pending hardware verification';
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      final packet = PacketBuilder.buildWriteSingleKeyPacket(
+        keyIndex: key.keyIndex,
+        layer: _activeLayer,
+        type: key.newType,
+        code1: key.newCode1,
+        code2: key.newCode2,
+        code3: key.newCode3,
+      );
+      final success = await _commandQueue.sendCommand(packet);
+      if (success) {
+        key.confirmPending();
+        _lastSyncError = null;
+        notifyListeners();
+        return true;
+      } else {
+        _lastSyncError = 'Failed to send key remap command';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _lastSyncError = 'Error synchronizing key remap: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Applies all pending key remappings for the specified layer (defaults to active layer).
+  Future<bool> applyAllPendingRemaps({int? layer}) async {
+    final targetLayer = layer ?? _activeLayer;
+    final targetList = (targetLayer == 1) ? _layer1 : _layer0;
+    final pendingKeys = targetList.where((k) => k.isPendingChange).toList();
+
+    if (pendingKeys.isEmpty) return true;
+
+    if (!_isConnected) {
+      _lastSyncError = 'Device is disconnected';
+      notifyListeners();
+      return false;
+    }
+
+    if (!_isUsingMock && _isHardwareWriteGated) {
+      _lastSyncError = 'Physical hardware writes are currently gated pending hardware verification';
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      for (final key in pendingKeys) {
+        final packet = PacketBuilder.buildWriteSingleKeyPacket(
+          keyIndex: key.keyIndex,
+          layer: targetLayer,
+          type: key.newType,
+          code1: key.newCode1,
+          code2: key.newCode2,
+          code3: key.newCode3,
+        );
+        final success = await _commandQueue.sendCommand(packet);
+        if (!success) {
+          _lastSyncError = 'Failed to remap key ${key.defaultName}';
+          notifyListeners();
+          return false;
+        }
+        key.confirmPending();
+      }
+      _lastSyncError = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _lastSyncError = 'Error applying key remappings: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Reverts all pending local changes for the specified layer back to confirmed hardware state.
+  void revertPendingRemaps({int? layer}) {
+    final targetLayer = layer ?? _activeLayer;
+    final targetList = (targetLayer == 1) ? _layer1 : _layer0;
+    for (final key in targetList) {
+      if (key.isPendingChange) {
+        key.revertPending();
+      }
+    }
+    _lastSyncError = null;
+    notifyListeners();
+  }
+
+  /// Resets the selected key in the active layer to factory default.
+  void resetSelectedKeyToDefault() {
+    if (selectedKey != null) {
+      selectedKey!.resetToDefault();
+      notifyListeners();
+    }
+  }
+
+  /// Resets all keys in the specified layer to factory default.
+  void resetLayerToDefault({int? layer}) {
+    final targetLayer = layer ?? _activeLayer;
+    final targetList = (targetLayer == 1) ? _layer1 : _layer0;
+    for (final key in targetList) {
+      key.resetToDefault();
+    }
+    notifyListeners();
+  }
+
+  /// Safely reads key layout from the device for the given layer (CMD 0x06, Sub 0x08).
+  Future<bool> readKeymapLayer(int layer) async {
+    try {
+      await _readKeyLayoutFromDevice(layer);
+      _lastSyncError = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _lastSyncError = 'Failed to read key layout: $e';
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<void> setSingleKeyColor(int keyIndex, Color color) async {
@@ -325,9 +608,11 @@ class KeyboardService extends ChangeNotifier {
       final req = PacketBuilder.buildReadKeymapChunkPacket(56 * chunk, layer);
       final resp = await _commandQueue.writeAndReadCommand(req);
       if (resp != null && resp.length >= 64) {
-        final payload = resp.sublist(8);
-        for (int i = 0; i < payload.length && (written + i) < 1024; i++) {
-          flatData[written + i] = payload[i];
+        final payload = PacketBuilder.parseKeymapChunkResponse(resp);
+        if (payload != null) {
+          for (int i = 0; i < payload.length && (written + i) < 1024; i++) {
+            flatData[written + i] = payload[i];
+          }
         }
       }
       written += 56;
@@ -336,12 +621,22 @@ class KeyboardService extends ChangeNotifier {
     for (int i = 0; i < target.length; i++) {
       final offset = 4 * target[i].keyIndex;
       if (offset + 3 < flatData.length && flatData[offset] != 0) {
-        target[i].newType = flatData[offset];
-        target[i].newCode1 = flatData[offset + 1];
-        target[i].newCode2 = flatData[offset + 2];
-        target[i].newCode3 = flatData[offset + 3];
+        final t = flatData[offset];
+        final c1 = flatData[offset + 1];
+        final c2 = flatData[offset + 2];
+        final c3 = flatData[offset + 3];
+        final resolved = KeyCodes.resolveKeyName(t, c1, c2, c3);
+        final name = (resolved.isNotEmpty && resolved != 'None') ? resolved : target[i].defaultName;
+        target[i].updateFromHardware(
+          type: t,
+          code1: c1,
+          code2: c2,
+          code3: c3,
+          name: name,
+        );
       }
     }
+    notifyListeners();
   }
 
   Future<void> _readCustomRgbFromDevice() async {
@@ -380,6 +675,20 @@ class KeyboardService extends ChangeNotifier {
   // Macro Actions
   // -------------------------------------------------------------
 
+  /// Reads all macros from the device's 4096-byte EEPROM memory arena.
+  Future<bool> readMacrosFromDevice() async {
+    try {
+      await _readMacrosFromDevice();
+      _lastSyncError = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _lastSyncError = 'Failed to read macros from keyboard: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> _readMacrosFromDevice() async {
     final eeprom = Uint8List(4096);
     for (int offset = 0; offset < 4096; offset += 56) {
@@ -397,17 +706,80 @@ class KeyboardService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveMacrosToKeyboard(List<MacroModel> newMacros) async {
+  /// Writes all 16 macros to the keyboard's 4096-byte EEPROM memory arena.
+  /// Strictly respects the physical write safety gate.
+  Future<bool> saveMacrosToKeyboard(List<MacroModel> newMacros) async {
+    if (!_isConnected) {
+      _lastSyncError = 'Device is disconnected';
+      notifyListeners();
+      return false;
+    }
+
+    if (!_isUsingMock && _isHardwareWriteGated) {
+      _lastSyncError = 'Physical hardware writes are currently gated pending hardware verification';
+      notifyListeners();
+      return false;
+    }
+
     _macros = newMacros;
     notifyListeners();
 
-    final eeprom = MacroCompiler.compileToEeprom(newMacros);
-    // Write in 59-byte chunks matching JavaScript setMacroData
-    for (int offset = 0; offset < 4096; offset += 59) {
-      final chunkLen = (4096 - offset < 59) ? (4096 - offset) : 59;
-      final chunk = eeprom.sublist(offset, offset + chunkLen);
-      final packet = PacketBuilder.buildWriteMacroChunkPacket(offset, chunk);
-      await _commandQueue.sendCommand(packet);
+    try {
+      final eeprom = MacroCompiler.compileToEeprom(newMacros);
+      // Write in 59-byte chunks matching JavaScript setMacroData
+      for (int offset = 0; offset < 4096; offset += 59) {
+        final chunkLen = (4096 - offset < 59) ? (4096 - offset) : 59;
+        final chunk = eeprom.sublist(offset, offset + chunkLen);
+        final packet = PacketBuilder.buildWriteMacroChunkPacket(offset, chunk);
+        final success = await _commandQueue.sendCommand(packet);
+        if (!success) {
+          _lastSyncError = 'Failed to write macro EEPROM chunk at offset $offset';
+          notifyListeners();
+          return false;
+        }
+      }
+      _lastSyncError = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _lastSyncError = 'Error saving macros: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Clears macro storage in the hardware EEPROM (CMD 0x06, Sub 0x0F, 0x04).
+  Future<bool> clearAllMacros() async {
+    _macros = List.generate(16, (i) => MacroModel(name: 'M$i', actions: []));
+    notifyListeners();
+
+    if (!_isConnected) {
+      _lastSyncError = 'Device is disconnected';
+      notifyListeners();
+      return false;
+    }
+
+    if (!_isUsingMock && _isHardwareWriteGated) {
+      _lastSyncError = 'Physical hardware writes are currently gated pending hardware verification';
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      final packet = PacketBuilder.buildResetMacrosPacket();
+      final success = await _commandQueue.sendCommand(packet);
+      if (!success) {
+        _lastSyncError = 'Failed to send macro reset command';
+        notifyListeners();
+        return false;
+      }
+      _lastSyncError = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _lastSyncError = 'Error resetting macros: $e';
+      notifyListeners();
+      return false;
     }
   }
 

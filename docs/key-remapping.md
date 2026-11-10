@@ -106,8 +106,63 @@
 * **Fn Layer (`1`)**: Secondary actions invoked when holding or locking the `Fn` key:
   * Numbers `1`..`0` mapped to `F1`..`F10`
   * `-` mapped to `F11`, `+` mapped to `F12`
-  * `W`/`A`/`S`/`D` or `I`/`J`/`K`/`L` mapped to Arrow keys (`Up`/`Left`/`Down`/`Right`)
+  * `W`/`A`/`S`/`D` mapped to Arrow keys (`Up`/`Left`/`Down`/`Right`)
+  * `Esc` mapped to `` ` `` (Grave accent)
   * `[` / `]` mapped to `PrintScreen` / `ScrollLock`
   * `;` / `'` mapped to `PageUp` / `PageDown`
   * `.` / `/` mapped to `Insert` / `Delete`
   * Backspace mapped to Reset / Factory restore
+
+> [!NOTE]
+> **Source Verification Status of Fn Defaults**:
+> The Fn Layer secondary mapping defaults listed above are **inferred** from standard 60% compact keyboard firmware conventions and project documentation. The recovered vendor application reads layer assignments dynamically from the keyboard microcontroller (via `CMD 0x06, 0x08`), rather than hardcoding static fallback tables.
+
+---
+
+## 5. Architecture: Confirmed vs Pending State Model
+
+To prevent accidental hardware state corruption and erratic UI flickering during key configuration, the software implements an explicit transactional state pattern:
+
+```
+[Key Catalog / User Selection]
+              │
+              ▼
+  ┌───────────────────────┐
+  │ Local Pending State   │ ◄── Local modifications (newType, newCode1..3, newName)
+  │ (isPendingChange = true)│     Visualized with Amber dot indicator on Keycap
+  └───────────┬───────────┘
+              │
+       User clicks "Apply"
+              │
+              ▼
+  ┌───────────────────────┐
+  │ Hardware Safety Gate  │ ──► [BLOCKED] if physical device & isHardwareWriteGated
+  └───────────┬───────────┘
+              │ (Simulated Mock or Un-gated Physical)
+              ▼
+  ┌───────────────────────┐
+  │ USB HID Command Queue │ ──► CMD 0x06, Sub 0x10 (Single Key) or Sub 0x09 (Chunk)
+  └───────────┬───────────┘
+              │
+       Command Confirmed
+              │
+              ▼
+  ┌───────────────────────┐
+  │ Confirmed State       │ ◄── confirmedType/Code1..3 updated
+  │ (isPendingChange = false)│  Status changes to "Hardware In Sync"
+  └───────────────────────┘
+```
+
+### 5.1 Revert and Reset Capabilities
+* **Revert Pending (`revertPendingRemaps`)**: Discards all uncommitted changes on the active layer and restores each key back to its `confirmed` state.
+* **Reset Selected Key (`resetSelectedKeyToDefault`)**: Re-assigns the selected key's pending action to its physical factory default.
+* **Reset Entire Layer (`resetLayerToDefault`)**: Restores all 61 keys in the active layer to their factory default mappings.
+
+---
+
+## 6. Hardware Write Safety Gate
+
+* **Safety Policy**: Direct physical writes to connected MK1300 V2 USB hardware remain **strictly blocked** by default (`isHardwareWriteGated = true`).
+* **Enforcement Point**: Both `KeyboardService.applyKeyRemap(keyIndex)` and `KeyboardService.applyAllPendingRemaps({layer})` reject write attempts with:
+  `"Physical hardware writes are currently gated pending hardware verification"`.
+* **Safe Development**: Simulated mock devices (`MockHidDevice`) bypass the safety gate in development and automated testing, allowing complete end-to-end simulation of key remapping, chunk updates, and readback synchronization without risk to real hardware.

@@ -1,0 +1,30 @@
+# Ant Esports MK1300 V2 Mechanical Gaming Keyboard
+# USB HID Device Permissions (udev rule)
+#
+# Vendor ID (VID):  0x36AE
+# Product ID (PID): 0xFE12
+#
+# PURPOSE:
+# Grant unprivileged desktop users permission to communicate with the MK1300 V2 keyboard
+# over USB HID (hidraw) for RGB lighting configuration, key remapping, and macro management,
+# eliminating the need to run the application as root.
+#
+# SECURITY IMPLICATIONS:
+# 1. TAG+="uaccess": Modern systemd-logind mechanism. Dynamically assigns ACL permissions
+#    only to the currently active, locally logged-in console user (seat0). When the user logs
+#    out or switches sessions, access is revoked.
+# 2. GROUP="plugdev", MODE="0660": Legacy fallback mechanism for distributions without
+#    systemd-logind or headless setups. Users in the 'plugdev' group are granted read/write
+#    access.
+# 3. Restricting to ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12" ensures only this
+#    specific keyboard hardware receives elevated access permissions.
+#
+# INSTALLATION:
+#   sudo cp 99-ant-esports-mk1300.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+
+# HIDRAW subsystem rules (used by hidapi-hidraw)
+KERNEL=="hidraw*", ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# USB subsystem fallback rules (used by libusb / direct USB access)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12", MODE="0660", GROUP="plugdev", TAG+="uaccess"

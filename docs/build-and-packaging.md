@@ -1,64 +1,70 @@
 # Ant Esports MK1300 V2 - Build and Deployment Guide
 
-This guide details how to build and package the native Flutter desktop application for **Windows x64** and **Linux**.
+This guide details how to build and package the native Flutter desktop application for **Linux x86_64**.
 
 ---
 
 ## 1. System Requirements
 
-### Windows Build Environment (Target Platform)
-- Windows 10/11 x64.
-- Visual Studio 2022 (with "Desktop development with C++" workload installed).
-- Flutter SDK (stable channel, >= 3.19.0).
-- Git for Windows.
-
-### Linux Environment
-- Ubuntu 22.04+ or modern Linux distribution.
-- Flutter SDK (stable channel, >= 3.19.0).
-- Standard build dependencies:
+### Linux Build Environment
+- **OS**: Ubuntu 22.04 LTS, Ubuntu 24.04 LTS, Ubuntu 26.04 LTS, Debian 12+, Fedora 39+, Arch Linux.
+- **Flutter SDK**: Stable channel (>= 3.19.0).
+- **Core Build Tools**:
   ```bash
-  sudo apt install clang cmake ninja-build g++ pkg-config libgtk-3-dev
+  sudo apt install clang cmake ninja-build g++ pkg-config libgtk-3-dev libhidapi-dev
   ```
 
 ---
 
-## 2. Windows Release Build
+## 2. Linux Release Build
 
-1. Clone or open the workspace:
-   ```cmd
-   cd MK1300-V2
-   ```
-
-2. Fetch Flutter packages:
-   ```cmd
+1. Resolve dependencies:
+   ```bash
    flutter pub get
    ```
 
-3. Run verification test suite:
-   ```cmd
+2. Run test verification suite:
+   ```bash
    flutter test
    ```
 
-4. Build the standalone Windows release executable:
-   ```cmd
-   flutter build windows --release
+3. Build the native Linux release executable:
+   ```bash
+   flutter build linux --release
    ```
 
-5. The production release is located at:
+4. The compiled production bundle is located at:
    ```
-   build\windows\x64\runner\Release\
+   build/linux/x64/release/bundle/
    ```
-
-### Bundling `hidapi.dll`
-When distributing the application, ensure `hidapi.dll` (x64) is co-located with `mk1300_v2.exe` in the application directory:
-- The `NativeHidDevice` FFI binding will automatically search the application directory for `hidapi.dll`.
-- If physical hardware is not attached, the application automatically falls back to the built-in offline hardware simulator.
+   Containing `mk1300_v2`, `libapp.so`, `libflutter_linux_gtk.so`, and `data/`.
 
 ---
 
-## 3. Automated CI/CD (GitHub Actions)
+## 3. Standalone AppImage Packaging
 
-A GitHub Actions workflow is provided in [`.github/workflows/build_windows.yml`](file:///home/devx/Development/MK1300-V2/.github/workflows/build_windows.yml).
-- Automatically triggers on push and pull requests to `main`.
-- Runs full `flutter test` validation.
-- Builds the Windows release and produces downloadable artifacts: `Ant-Esports-MK1300-V2-Windows-x64.zip`.
+To build the standalone, distributable `MK1300-V2-x86_64.AppImage`:
+
+```bash
+./linux/packaging/build_appimage.sh
+```
+
+This generates:
+- `dist/MK1300-V2-x86_64.AppImage`
+- `dist/SHA256SUMS`
+- `dist/99-ant-esports-mk1300.rules`
+
+### Running the AppImage
+```bash
+chmod +x dist/MK1300-V2-x86_64.AppImage
+./dist/MK1300-V2-x86_64.AppImage
+```
+
+---
+
+## 4. Hardware Safety Gate
+
+By default, physical hardware writes are blocked by the safety gate in `KeyboardService`:
+- `isHardwareWriteGated = true`
+- If physical writes are attempted without physical verification or explicit user override, the service blocks transmission and logs a safety warning.
+- The built-in mock device provider (`MockHidDevice`) enables 100% offline testing of all protocol commands, lighting sequences, key remapping, and macro EEPROM operations without risk of damaging hardware.

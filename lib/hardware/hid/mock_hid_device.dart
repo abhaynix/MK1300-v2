@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import '../../core/constants/usb_constants.dart';
 import '../../core/utils/byte_buffer.dart';
+import '../../features/key_remapping/models/key_geometry.dart';
 import 'hid_device.dart';
 
 /// Simulated MK1300 V2 USB HID device for development, testing, and offline previews.
@@ -28,12 +29,24 @@ class MockHidDevice implements HidDevice {
   final List<List<int>> _layer1Keys = List.generate(74, (i) => [32, 0, i, 0]);
   final List<List<int>> _keyColors = List.generate(74, (i) => [0, 200, 255]);
 
+  // Failure & delay simulation flags
+  bool simulateWriteFailure = false;
+  bool simulateReadFailure = false;
+  int simulatedResponseDelayMs = 0;
+
   Uint8List? _lastWritePayload;
 
   MockHidDevice() {
     // Initialize macro table with 0xFF in header
     for (int i = 0; i < 64; i++) {
       _macroEeprom[i] = 0xFF;
+    }
+    // Initialize keys with standard 61-key layout defaults
+    for (final geo in KeyGeometry.fallbackLayout61) {
+      if (geo.index < _layer0Keys.length) {
+        _layer0Keys[geo.index] = [32, 0, geo.defaultCode, 0];
+        _layer1Keys[geo.index] = [32, 0, geo.defaultCode, 0];
+      }
     }
   }
 
@@ -51,6 +64,15 @@ class MockHidDevice implements HidDevice {
 
   int get batteryLevel => _batteryLevel;
 
+  /// Inspects a simulated key descriptor tuple [type, code1, code2, code3] for testing.
+  List<int>? getKeyDescriptor(int layer, int keyIdx) {
+    final list = (layer == 1) ? _layer1Keys : _layer0Keys;
+    if (keyIdx >= 0 && keyIdx < list.length) {
+      return List<int>.from(list[keyIdx]);
+    }
+    return null;
+  }
+
   @override
   Stream<Uint8List> get reportStream => _reportStreamController.stream;
 
@@ -63,12 +85,15 @@ class MockHidDevice implements HidDevice {
   @override
   Future<void> close() async {
     _isOpen = false;
-    await _reportStreamController.close();
+    unawaited(_reportStreamController.close());
   }
 
   @override
   Future<bool> writeReport(Uint8List payload) async {
-    if (!_isOpen) return false;
+    if (!_isOpen || simulateWriteFailure) return false;
+    if (simulatedResponseDelayMs > 0) {
+      await Future.delayed(Duration(milliseconds: simulatedResponseDelayMs));
+    }
     _lastWritePayload = Uint8List.fromList(payload);
 
     if (payload.length < 2) return true;
@@ -97,6 +122,28 @@ class MockHidDevice implements HidDevice {
         case 0xFC: // Set Sleep
           if (payload.length >= 7) {
             _autoSleepSeconds = ByteBufferUtils.fromUint16BytesLE(payload[5], payload[6]);
+          }
+          break;
+        case 0x09: // Write Keymap Chunk
+          if (payload.length >= 8) {
+            final lenParam = payload[2];
+            final byteOffset = ByteBufferUtils.fromUint16BytesLE(payload[3], payload[4]);
+            final layer = payload[6];
+            final targetLayer = (layer == 1) ? _layer1Keys : _layer0Keys;
+            final chunkDataLen = (lenParam > 3) ? (lenParam - 3) : (payload.length - 8);
+
+            for (int i = 0; i < chunkDataLen && (8 + i + 3) < payload.length; i += 4) {
+              final keyByteOffset = byteOffset + i;
+              final keyIdx = keyByteOffset ~/ 4;
+              if (keyIdx < targetLayer.length) {
+                targetLayer[keyIdx] = [
+                  payload[8 + i],
+                  payload[8 + i + 1],
+                  payload[8 + i + 2],
+                  payload[8 + i + 3],
+                ];
+              }
+            }
           }
           break;
         case 0x10: // Write Single Key
@@ -131,13 +178,23 @@ class MockHidDevice implements HidDevice {
           }
           break;
         case 0x0F: // Reset
-          if (payload.length >= 3 && payload[2] == 0xFF) {
-            // Factory reset
-            _lightingMode = 1;
-            _brightness = 3;
-            _speed = 2;
-            _activeLayer = 0;
-            _batteryLevel = 92;
+          if (payload.length >= 3) {
+            if (payload[2] == 0xFF) {
+              // Factory reset
+              _lightingMode = 1;
+              _brightness = 3;
+              _speed = 2;
+              _activeLayer = 0;
+              _batteryLevel = 92;
+            } else if (payload[2] == 0x04) {
+              // Reset Macro storage
+              for (int i = 0; i < 64; i++) {
+                _macroEeprom[i] = 0xFF;
+              }
+              for (int i = 64; i < 4096; i++) {
+                _macroEeprom[i] = 0x00;
+              }
+            }
           }
           break;
       }
@@ -147,7 +204,10 @@ class MockHidDevice implements HidDevice {
 
   @override
   Future<Uint8List?> readReport({int timeoutMs = 1000}) async {
-    if (!_isOpen || _lastWritePayload == null) return null;
+    if (!_isOpen || simulateReadFailure || _lastWritePayload == null) return null;
+    if (simulatedResponseDelayMs > 0) {
+      await Future.delayed(Duration(milliseconds: simulatedResponseDelayMs));
+    }
 
     final req = _lastWritePayload!;
     final opcode = req[0];
@@ -263,17 +323,28 @@ class MockHidDevice implements HidDevice {
     return resp;
   }
 
+  /// Emits a raw unsolicited hardware report.
+  void emitUnsolicitedReport(Uint8List report) {
+    if (_isOpen && !_reportStreamController.isClosed) {
+      _reportStreamController.add(report);
+    }
+  }
+
   /// Emits a simulated live hardware shortcut event (e.g. Fn + \ changed mode).
-  void simulateHardwareEvent(int newMode, int brightness, int speed) {
+  void simulateHardwareEvent(int newMode, int brightness, int speed, {int direction = 1, int colorMode = 0, int h = 100, int s = 255, int v = 255}) {
     final event = Uint8List(64);
     event[0] = UsbConstants.eventHeaderByte0; // 0xAA
     event[1] = UsbConstants.eventHeaderByte1; // 0xFA
-    event[5] = 0;
+    event[2] = 0x09; // length
+    event[6] = 1;    // type
     event[7] = newMode;
     event[8] = brightness;
     event[9] = speed;
-    event[10] = 1;
-    event[11] = 0;
-    _reportStreamController.add(event);
+    event[10] = direction;
+    event[11] = colorMode;
+    event[12] = h;
+    event[13] = s;
+    event[14] = v;
+    emitUnsolicitedReport(event);
   }
 }
