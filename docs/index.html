@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ant Esports MK1300 V2 - Linux Desktop Software</title>
+  <meta name="description" content="Native Linux desktop software for the Ant Esports MK1300 V2 mechanical keyboard. Accurate 61-key visualizer, 22 RGB modes, key remapping, and 4KB EEPROM macros.">
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&family=Onest:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Sticky Navigation -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <img src="assets/icon.png" alt="MK1300 V2 Icon" class="brand-logo">
+        <span class="brand-name">Ant Esports <span class="brand-highlight">MK1300 V2</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#interactive">Visualizer</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/abhaynix/MK1300-v2" target="_blank" rel="noopener" class="btn btn-outline btn-sm">
+          GitHub
+          <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        <span>Linux Native &bull; Vision 9520 MCU</span>
+      </div>
+
+      <h1 class="hero-title">
+        The Linux desktop software for <span class="highlight">Ant Esports MK1300 V2</span>
+      </h1>
+
+      <p class="hero-lead">
+        A fast, native Linux desktop application engineered to replace the legacy Windows Electron software with a <span class="highlight">13 megabyte AppImage</span> and direct USB HID communication.
+      </p>
+
+      <div class="hero-actions">
+        <a href="https://github.com/abhaynix/MK1300-v2/releases/latest" class="btn btn-solid">
+          Download AppImage
+          <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+        </a>
+        <a href="https://github.com/abhaynix/MK1300-v2" class="btn btn-outline" target="_blank" rel="noopener">
+          View source
+          <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- Interactive Keyboard Visualizer Section -->
+    <section id="interactive" class="interactive-section">
+      <div class="section-header">
+        <h2 class="section-title">Interactive 61-key visualizer</h2>
+        <p class="section-sub">
+          Experience the recovered ANSI 60% matrix layout in real-time. Click any keycap or switch lighting effects below.
+        </p>
+      </div>
+
+      <div class="visualizer-card">
+        <!-- Controls bar -->
+        <div class="visualizer-bar">
+          <div class="effect-selector">
+            <span class="control-label">Lighting effect:</span>
+            <div class="effect-pills">
+              <button class="pill active" data-effect="wave">Rainbow wave</button>
+              <button class="pill" data-effect="breathe">Breathing cream</button>
+              <button class="pill" data-effect="reactive">Key reaction</button>
+              <button class="pill" data-effect="static">Static white</button>
+            </div>
+          </div>
+          <div class="layer-pill">
+            <span class="status-indicator"></span>
+            <span id="active-key-label">Selected: Spacebar (6.25u)</span>
+          </div>
+        </div>
+
+        <!-- 61-Key Interactive Grid -->
+        <div class="keyboard-stage">
+          <div class="keyboard-case" id="keyboard">
+            <!-- Rendered by app.js from the recovered 36ae_fe12 geometry -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Features Grid -->
+    <section id="features" class="features-section">
+      <div class="section-header">
+        <h2 class="section-title">Engineered for precision and restraint</h2>
+        <p class="section-sub">
+          Every hardware register, packet offset, and keymap boundary is verified against recovered source code.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"/></svg>
+          </div>
+          <h3 class="card-title">Accurate 61-key visualizer</h3>
+          <p class="card-desc">
+            Constructed directly from the recovered <span class="highlight">ANSI 60 percent layout</span> geometry with 5 rows, 15 matrix columns, and true keycap aspect ratios.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+          <h3 class="card-title">Lighting studio and HSV engine</h3>
+          <p class="card-desc">
+            Access all 22 verified hardware animation modes, 5 brightness levels, speed adjustments, and a <span class="highlight">pure Dart color engine</span>.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <h3 class="card-title">Key remapping and layers</h3>
+          <p class="card-desc">
+            Configure Main Layer 0 and secondary Fn Layer 1 with media, mouse, and shortcut actions using <span class="highlight">transactional pending states</span>.
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          </div>
+          <h3 class="card-title">Macro studio and 4KB EEPROM</h3>
+          <p class="card-desc">
+            Compile 16 macro slots into the exact 4096-byte hardware EEPROM binary format with <span class="highlight">millisecond action delays</span> and loop modes.
+          </p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="card-title">Hardware safety gate</h3>
+          <p class="card-desc">
+            Physical hardware writes are strictly gated by default to protect your keyboard, backed by an <span class="highlight">offline hardware simulator</span>.
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+          </div>
+          <h3 class="card-title">ChaiUI design system</h3>
+          <p class="card-desc">
+            Restrained, dark aesthetic crafted with warm hairline borders, quiet cream typography, and <span class="highlight">asymmetric corner buttons</span>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Installation & Setup Section -->
+    <section id="install" class="install-section">
+      <div class="section-header">
+        <h2 class="section-title">Quick start on Linux</h2>
+        <p class="section-sub">
+          Download the standalone AppImage and configure USB permissions in two simple steps.
+        </p>
+      </div>
+
+      <div class="install-cards">
+        <!-- Step 1: Run AppImage -->
+        <div class="card install-card">
+          <div class="step-badge">Step 1</div>
+          <h3 class="card-title">Run the AppImage</h3>
+          <p class="card-desc">Make the AppImage executable and launch it directly on any modern 64-bit Linux distribution:</p>
+          <div class="code-block">
+            <code>chmod +x MK1300-V2-x86_64.AppImage<br>./MK1300-V2-x86_64.AppImage</code>
+            <button class="copy-btn" data-copy="chmod +x MK1300-V2-x86_64.AppImage && ./MK1300-V2-x86_64.AppImage">Copy</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Install udev Rules -->
+        <div class="card install-card">
+          <div class="step-badge">Step 2</div>
+          <h3 class="card-title">Install udev rules</h3>
+          <p class="card-desc">Grant unprivileged user access to the USB HID interface without running the app as root:</p>
+          <div class="code-block">
+            <code>sudo cp 99-ant-esports-mk1300.rules /etc/udev/rules.d/<br>sudo udevadm control --reload-rules && sudo udevadm trigger</code>
+            <button class="copy-btn" data-copy="sudo cp 99-ant-esports-mk1300.rules /etc/udev/rules.d/ && sudo udevadm control --reload-rules && sudo udevadm trigger">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-info">
+        <span class="footer-brand">Ant Esports MK1300 V2 Linux Software</span>
+        <span class="footer-note">Built with Flutter, Dart C-FFI, and the ChaiUI design system.</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/abhaynix/MK1300-v2" target="_blank" rel="noopener">GitHub Repository</a>
+        <a href="https://github.com/abhaynix/MK1300-v2/releases" target="_blank" rel="noopener">Releases</a>
+        <a href="https://ui.chaicode.com" target="_blank" rel="noopener">ChaiUI</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
