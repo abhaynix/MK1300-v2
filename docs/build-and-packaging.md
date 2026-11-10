@@ -1,4 +1,4 @@
-# Ant Esports MK1300 V2 - Build and Deployment Guide
+# MK1300 V2 - Build and Deployment Guide
 
 This guide details how to build and package the native Flutter desktop application for **Linux x86_64**.
 
@@ -37,27 +37,27 @@ This guide details how to build and package the native Flutter desktop applicati
    ```
    build/linux/x64/release/bundle/
    ```
-   Containing `mk1300_v2`, `libapp.so`, `libflutter_linux_gtk.so`, and `data/`.
+   Containing `keyboard_studio`, `libapp.so`, `libflutter_linux_gtk.so`, and `data/`.
 
 ---
 
 ## 3. Standalone AppImage Packaging
 
-To build the standalone, distributable `MK1300-V2-x86_64.AppImage`:
+To build the standalone, distributable `KeyboardStudio-x86_64.AppImage`:
 
 ```bash
 ./linux/packaging/build_appimage.sh
 ```
 
 This generates:
-- `dist/MK1300-V2-x86_64.AppImage`
+- `dist/KeyboardStudio-x86_64.AppImage`
 - `dist/SHA256SUMS`
-- `dist/99-ant-esports-mk1300.rules`
+- `dist/99-keyboard-studio-mk1300.rules`
 
 ### Running the AppImage
 ```bash
-chmod +x dist/MK1300-V2-x86_64.AppImage
-./dist/MK1300-V2-x86_64.AppImage
+chmod +x dist/KeyboardStudio-x86_64.AppImage
+./dist/KeyboardStudio-x86_64.AppImage
 ```
 
 ---

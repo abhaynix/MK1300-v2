@@ -1,4 +1,4 @@
-# Ant Esports MK1300 V2 - Software Module Specification
+# MK1300 V2 - Software Module Specification
 
 ## 1. Architectural Principles
 

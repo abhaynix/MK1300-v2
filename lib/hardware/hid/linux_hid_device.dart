@@ -147,7 +147,7 @@ class LinuxHidDevice implements HidDevice {
 
   Completer<Uint8List?>? _pendingReadCompleter;
 
-  /// Enumerates connected USB devices on Linux matching Ant Esports MK1300 V2.
+  /// Enumerates connected USB devices on Linux matching MK1300 V2.
   static List<LinuxHidDevice> enumerateDevices({
     int vid = UsbConstants.vendorId,
     int pid = UsbConstants.productId,
@@ -170,7 +170,7 @@ class LinuxHidDevice implements HidDevice {
         final device = LinuxHidDevice(
           vendorId: info.vendorId,
           productId: info.productId,
-          productName: 'Ant Esports MK1300 V2',
+          productName: 'MK1300 V2',
           devicePath: pathStr,
         );
         // Put vendor-specific matches at the front of the list

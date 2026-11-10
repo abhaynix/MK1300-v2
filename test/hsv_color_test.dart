@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mk1300_v2/core/utils/hsv_color.dart';
+import 'package:keyboard_studio/core/utils/hsv_color.dart';
 
 void main() {
   group('HsvColor Pure Dart Engine Tests', () {

@@ -1,4 +1,4 @@
-# Reconstructed Architecture: Ant Esports MK1300 V2 in Flutter
+# Reconstructed Architecture: MK1300 V2 in Flutter
 
 ## 1. Architectural Principles
 

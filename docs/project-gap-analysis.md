@@ -1,4 +1,4 @@
-# Ant Esports MK1300 V2 - Project Gap Analysis
+# MK1300 V2 - Project Gap Analysis
 
 ## 1. Overview & Audit Scope
 
@@ -14,7 +14,7 @@ This document details the gaps between the recovered source code / reverse engin
   * `LinuxHidDevice` using Dart FFI to bind `libhidapi-hidraw.so.0` with graceful fallback to `MockHidDevice`.
   * `CommandQueue` serializing asynchronous writes and responses without race conditions.
   * `PacketBuilder` encoding all verified commands with Little-Endian byte math and bounds clamping.
-  * System udev permission rules (`99-ant-esports-mk1300.rules`) created and bundled for non-root desktop access.
+  * System udev permission rules (`99-keyboard-studio-mk1300.rules`) created and bundled for non-root desktop access.
 
 ### 2.2 Dashboard & Visualizer (Phase 5B)
 * **Status**: **RESOLVED & VERIFIED**
@@ -56,15 +56,15 @@ This document details the gaps between the recovered source code / reverse engin
 * **Delivered**:
   * `SettingsPage` with sleep timeout dropdown (0s, 120s, 300s, 600s, 1800s), device metadata card, and factory reset guard.
   * Profile switching (`CMD 0x06, 0xFB`) in `KeyboardService.switchProfile(int)`.
-  * FreeDesktop desktop entry `linux/packaging/mk1300_v2.desktop`.
-  * Hi-DPI application icon `linux/packaging/mk1300_v2.png` extracted at 256x256.
-  * Automated AppImage packaging script `linux/packaging/build_appimage.sh` producing `dist/MK1300-V2-x86_64.AppImage`.
+  * FreeDesktop desktop entry `linux/packaging/dev.exdevx.keyboard_studio.desktop`.
+  * Hi-DPI application icon `linux/packaging/dev.exdevx.keyboard_studio.png` extracted at 256x256.
+  * Automated AppImage packaging script `linux/packaging/build_appimage.sh` producing `dist/KeyboardStudio-x86_64.AppImage`.
   * Cryptographic checksum generation in `dist/SHA256SUMS`.
   * AppImage execution verified on Linux with Impeller rendering backend.
 
 ### 2.7 Physical Hardware Validation
 * **Status**: **PENDING PHYSICAL DEVICE AVAILABILITY**
 * **Status Policy**:
-  * The physical Ant Esports MK1300 V2 keyboard is not attached to the host environment.
+  * The physical MK1300 V2 keyboard is not attached to the host environment.
   * All protocol communication is fully verified against the original recovered JavaScript source and the `MockHidDevice` simulation state machine.
   * Physical verification is explicitly recorded as **PENDING** in all project documentation until tested on physical hardware.

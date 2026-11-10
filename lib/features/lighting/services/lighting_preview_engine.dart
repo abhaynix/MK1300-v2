@@ -7,7 +7,7 @@ import '../models/lighting_mode.dart';
 import '../models/lighting_state.dart';
 
 /// Pure computation engine for calculating 61-key animation frames based on
-/// recovered lighting effects from the original Ant Esports MK1300 V2 software.
+/// recovered lighting effects from the original MK1300 V2 software.
 ///
 /// NOTE: Previews are approximate visual simulations designed for responsive local desktop rendering.
 /// Real firmware timing and LED driver PWM response may vary slightly.

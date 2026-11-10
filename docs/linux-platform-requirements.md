@@ -1,8 +1,8 @@
-# Ant Esports MK1300 V2 - Linux Platform Requirements
+# MK1300 V2 - Linux Platform Requirements
 
 ## 1. Scope & Platform Target
 
-This document establishes the official platform constraints, runtime environments, native Linux HID requirements, and kernel device permissions for the **Ant Esports MK1300 V2 Linux Desktop Application**.
+This document establishes the official platform constraints, runtime environments, native Linux HID requirements, and kernel device permissions for the **MK1300 V2 Linux Desktop Application**.
 
 ### Platform Scope
 - **Target OS**: Linux (Ubuntu 22.04 LTS, 24.04 LTS primary; Debian 12+, Fedora 39+, Arch Linux secondary).
@@ -48,10 +48,10 @@ By default, the Linux kernel assigns `/dev/hidraw*` devices root-only read/write
 Running desktop applications with `sudo` is an anti-pattern that violates desktop security and impairs desktop environments (Wayland/X11 socket access).
 
 ### Mandatory udev Rule
-A dedicated udev rule file `/etc/udev/rules.d/99-antesports-mk1300.rules` must be installed:
+A dedicated udev rule file `/etc/udev/rules.d/99-keyboard-studio-mk1300.rules` must be installed:
 
 ```udev
-# Ant Esports MK1300 V2 Mechanical Gaming Keyboard (Vision 9520 MCU)
+# MK1300 V2 Mechanical Gaming Keyboard (Vision 9520 MCU)
 # Allow read/write access to vendor control interface for desktop users in the 'plugdev' or 'uaccess' seat
 
 # hidraw subsystem rule with uaccess tag (systemd-logind active session)

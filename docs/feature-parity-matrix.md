@@ -1,4 +1,4 @@
-# Ant Esports MK1300 V2 - Feature Parity Matrix
+# MK1300 V2 - Feature Parity Matrix
 
 This matrix compares the original vendor application against the Flutter Linux desktop implementation.
 
@@ -29,4 +29,4 @@ This matrix compares the original vendor application against the Flutter Linux d
 | **Profile Management** | 3 hardware profiles switched via `CMD 0x06, 0xFB` | `KeyboardService.switchProfile()` and AppShell switcher | Tested (`mock_hid_device_test.dart`) | **Pending Physical Verification** |
 | **Sleep Timer Settings** | `CMD 0x06, 0xFC` (0, 120s, 300s, 600s, 1800s) | `SettingsPage` power card with dropdown options | Tested (`mock_hid_device_test.dart`) | **Pending Physical Verification** |
 | **Hardware Safety Gate** | None (always wrote directly) | `isHardwareWriteGated = true` blocking unverified physical writes | Tested (`key_remapping_test.dart`, `macro_studio_test.dart`, `lighting_synchronization_test.dart`) | Gated by Policy (Verified) |
-| **Linux Packaging (AppImage)** | Windows NSIS installer only | Standalone x86_64 AppImage with embedded runtime & icons (`dist/MK1300-V2-x86_64.AppImage`) | Verified (Extracted & Executed) | Linux Desktop Ready |
+| **Linux Packaging (AppImage)** | Windows NSIS installer only | Standalone x86_64 AppImage with embedded runtime & icons (`dist/KeyboardStudio-x86_64.AppImage`) | Verified (Extracted & Executed) | Linux Desktop Ready |

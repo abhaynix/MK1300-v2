@@ -1,4 +1,4 @@
-# Ant Esports MK1300 V2 - REA Reverse Engineering Report
+# MK1300 V2 - REA Reverse Engineering Report
 
 ## 1. Executive Summary & Methodology
 

@@ -1,6 +1,6 @@
-# Ant Esports MK1300 V2 - Linux Implementation Roadmap
+# MK1300 V2 - Linux Implementation Roadmap
 
-This roadmap defines the sequential development, testing, and deployment phases for the **Ant Esports MK1300 V2 Native Linux Desktop Application**.
+This roadmap defines the sequential development, testing, and deployment phases for the **MK1300 V2 Native Linux Desktop Application**.
 
 ---
 
@@ -25,7 +25,7 @@ flowchart TD
 
 ### Phase 1: Linux HID Discovery & Permissions
 - **Objective**: Establish native C-FFI `hidapi` connection on Linux to identify VID `0x36AE` and PID `0xFE12` on Interface 1 without root privileges.
-- **Required Modules**: `lib/hardware/hid/hid_device.dart`, `lib/hardware/hid/hidapi_binding.dart`, udev rule `99-antesports-mk1300.rules`.
+- **Required Modules**: `lib/hardware/hid/hid_device.dart`, `lib/hardware/hid/hidapi_binding.dart`, udev rule `99-keyboard-studio-mk1300.rules`.
 - **Acceptance Criteria**: App detects connected device or activates `MockHidDevice` with graceful error catching.
 - **Tests**: FFI library load unit test, mock fallback test.
 - **Risks**: Missing `libhidapi-hidraw.so` on user system; mitigated by dynamic library search order.
@@ -80,7 +80,7 @@ flowchart TD
 - **Risks**: Accidental factory reset; mitigated by explicit user confirmation dialog.
 
 ### Phase 9: Physical Hardware Verification
-- **Objective**: Connect physical Ant Esports MK1300 V2 keyboard on Linux to verify EEPROM persistence and live shortcut broadcasting.
+- **Objective**: Connect physical MK1300 V2 keyboard on Linux to verify EEPROM persistence and live shortcut broadcasting.
 - **Acceptance Criteria**: Persistence across power cycle; unsolicited `Fn` shortcut events received and updated in UI.
 - **Tests**: Physical USB hardware validation suite.
 - **Risks**: Non-destructive operation only; firmware flashing opcodes (`0x55`, `0x5A`) completely removed.

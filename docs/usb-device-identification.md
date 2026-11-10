@@ -1,8 +1,8 @@
-# USB Device Identification: Ant Esports MK1300 V2
+# USB Device Identification: MK1300 V2
 
 ## 1. Hardware Identifiers
 
-The target hardware is the **Ant Esports MK1300 V2 Mechanical Gaming Keyboard**.
+The target hardware is the **MK1300 V2 Mechanical Gaming Keyboard**.
 
 | Property | Value | Representation |
 |---|---|---|
@@ -45,7 +45,7 @@ The codebase includes references to sibling hardware designs using the same Visi
 * `0x36AE:0xFEAD` (Z61-ARGB variant)
 * `0x36AE:0xFCAB` (9-Key 68PRO)
 
-This confirms that the Ant Esports MK1300 V2 uses the **`0x36AE:0xFE12`** firmware build specifically configured for the 61-key mechanical form factor.
+This confirms that the MK1300 V2 uses the **`0x36AE:0xFE12`** firmware build specifically configured for the 61-key mechanical form factor.
 
 ---
 

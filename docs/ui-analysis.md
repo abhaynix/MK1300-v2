@@ -1,4 +1,4 @@
-# UI/UX Analysis & Design System: Ant Esports MK1300 V2
+# UI/UX Analysis & Design System: MK1300 V2
 
 ## 1. Visual Identity & Theme
 

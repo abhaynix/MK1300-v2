@@ -1,13 +1,13 @@
 import 'dart:typed_data';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mk1300_v2/core/constants/usb_constants.dart';
-import 'package:mk1300_v2/features/lighting/models/lighting_mode.dart';
-import 'package:mk1300_v2/features/lighting/models/lighting_state.dart';
-import 'package:mk1300_v2/features/lighting/services/unsolicited_event_decoder.dart';
-import 'package:mk1300_v2/hardware/hid/mock_hid_device.dart';
-import 'package:mk1300_v2/hardware/protocol/packet_builder.dart';
-import 'package:mk1300_v2/hardware/services/keyboard_service.dart';
+import 'package:keyboard_studio/core/constants/usb_constants.dart';
+import 'package:keyboard_studio/features/lighting/models/lighting_mode.dart';
+import 'package:keyboard_studio/features/lighting/models/lighting_state.dart';
+import 'package:keyboard_studio/features/lighting/services/unsolicited_event_decoder.dart';
+import 'package:keyboard_studio/hardware/hid/mock_hid_device.dart';
+import 'package:keyboard_studio/hardware/protocol/packet_builder.dart';
+import 'package:keyboard_studio/hardware/services/keyboard_service.dart';
 
 void main() {
   group('Phase 6B: Lighting Protocol & Packet Serialization Tests', () {

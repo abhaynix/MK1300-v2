@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
-import 'package:mk1300_v2/core/constants/usb_constants.dart';
-import 'package:mk1300_v2/core/utils/color_utils.dart';
-import 'package:mk1300_v2/hardware/protocol/packet_builder.dart';
-import 'package:mk1300_v2/features/macros/models/macro_action.dart';
-import 'package:mk1300_v2/features/macros/models/macro_model.dart';
-import 'package:mk1300_v2/features/macros/services/macro_compiler.dart';
+import 'package:keyboard_studio/core/constants/usb_constants.dart';
+import 'package:keyboard_studio/core/utils/color_utils.dart';
+import 'package:keyboard_studio/hardware/protocol/packet_builder.dart';
+import 'package:keyboard_studio/features/macros/models/macro_action.dart';
+import 'package:keyboard_studio/features/macros/models/macro_model.dart';
+import 'package:keyboard_studio/features/macros/services/macro_compiler.dart';
 
 void main() {
   group('ColorUtils Firmware HSV Math Tests', () {

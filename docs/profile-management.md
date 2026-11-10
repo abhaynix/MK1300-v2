@@ -1,4 +1,4 @@
-# Profile Management: Ant Esports MK1300 V2
+# Profile Management: MK1300 V2
 
 ## 1. Hardware Profiles Overview
 

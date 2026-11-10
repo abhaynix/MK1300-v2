@@ -2,7 +2,7 @@
 
 ## 1. Overview & Strategy
 
-The Flutter implementation reconstructs the original Ant Esports MK1300 V2 software as a high-performance native desktop application on Windows (with full architecture support for Linux).
+The Flutter implementation reconstructs the original MK1300 V2 software as a high-performance native desktop application on Windows (with full architecture support for Linux).
 
 ---
 

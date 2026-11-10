@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_print
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mk1300_v2/hardware/hid/linux_hid_device.dart';
-import 'package:mk1300_v2/hardware/protocol/command_queue.dart';
-import 'package:mk1300_v2/hardware/protocol/packet_builder.dart';
+import 'package:keyboard_studio/hardware/hid/linux_hid_device.dart';
+import 'package:keyboard_studio/hardware/protocol/command_queue.dart';
+import 'package:keyboard_studio/hardware/protocol/packet_builder.dart';
 
 void main() {
   test('Physical Keyboard In-Vivo Communication & Lighting Query', () async {

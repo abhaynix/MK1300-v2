@@ -1,4 +1,4 @@
-# Ant Esports MK1300 V2 - Feature Acceptance Criteria
+# MK1300 V2 - Feature Acceptance Criteria
 
 This document provides explicit, testable acceptance criteria for every application capability.
 
@@ -7,7 +7,7 @@ This document provides explicit, testable acceptance criteria for every applicat
 ## 1. Hardware Connection & USB HID Management
 
 ### AC-1.1: Physical Device Discovery
-- **Given**: An Ant Esports MK1300 V2 keyboard is attached to a Linux host via USB.
+- **Given**: An MK1300 V2 keyboard is attached to a Linux host via USB.
 - **When**: The application launches or the "Rescan Bus" button is pressed.
 - **Then**: `hidapi` must discover a device with VID `0x36AE`, PID `0xFE12`, and Interface `1`.
 - **And**: The top bar status badge must change to `DEVICE CONNECTED` (Green).

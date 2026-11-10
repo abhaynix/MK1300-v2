@@ -1,15 +1,15 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mk1300_v2/core/constants/usb_constants.dart';
-import 'package:mk1300_v2/features/key_remapping/models/key_geometry.dart';
-import 'package:mk1300_v2/features/key_remapping/models/key_mapping.dart';
-import 'package:mk1300_v2/features/key_remapping/presentation/key_remapping_page.dart';
-import 'package:mk1300_v2/features/key_remapping/presentation/keyboard_visualizer.dart';
-import 'package:mk1300_v2/hardware/hid/hid_device.dart';
-import 'package:mk1300_v2/hardware/hid/mock_hid_device.dart';
-import 'package:mk1300_v2/hardware/protocol/packet_builder.dart';
-import 'package:mk1300_v2/hardware/services/keyboard_service.dart';
+import 'package:keyboard_studio/core/constants/usb_constants.dart';
+import 'package:keyboard_studio/features/key_remapping/models/key_geometry.dart';
+import 'package:keyboard_studio/features/key_remapping/models/key_mapping.dart';
+import 'package:keyboard_studio/features/key_remapping/presentation/key_remapping_page.dart';
+import 'package:keyboard_studio/features/key_remapping/presentation/keyboard_visualizer.dart';
+import 'package:keyboard_studio/hardware/hid/hid_device.dart';
+import 'package:keyboard_studio/hardware/hid/mock_hid_device.dart';
+import 'package:keyboard_studio/hardware/protocol/packet_builder.dart';
+import 'package:keyboard_studio/hardware/services/keyboard_service.dart';
 
 /// Pre-loaded fallback geometries to avoid rootBundle.loadString in tests.
 final _testGeometries = KeyGeometry.fallbackLayout61;
@@ -29,7 +29,7 @@ class _FakePhysicalHidDevice implements HidDevice {
   int get productId => UsbConstants.productId;
 
   @override
-  String get productName => 'Ant Esports MK1300 V2 (Physical Mock)';
+  String get productName => 'MK1300 V2 (Physical Mock)';
 
   @override
   Stream<Uint8List> get reportStream => const Stream.empty();

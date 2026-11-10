@@ -1,9 +1,9 @@
-# Ant Esports MK1300 V2 - Test Execution Results
+# MK1300 V2 - Test Execution Results
 
 **Date**: 2026-11-08  
 **Environment**: Dart 3.13.7 / Flutter 3.47.9 Desktop on Ubuntu 26.04.1 LTS x86_64  
-**Target Hardware**: Ant Esports MK1300 V2 Mechanical Gaming Keyboard (Vision 9520 MCU, VID `0x36AE`, PID `0xFE12`)  
-**Target Output**: Native Linux Release Binary & Standalone AppImage (`dist/MK1300-V2-x86_64.AppImage`)
+**Target Hardware**: MK1300 V2 Mechanical Gaming Keyboard (Vision 9520 MCU, VID `0x36AE`, PID `0xFE12`)  
+**Target Output**: Native Linux Release Binary & Standalone AppImage (`dist/KeyboardStudio-x86_64.AppImage`)
 
 ---
 
@@ -40,7 +40,7 @@
 
 - **Command**: `flutter build linux --release`
 - **Exit Code**: `0`
-- **Target Path**: `build/linux/x64/release/bundle/mk1300_v2`
+- **Target Path**: `build/linux/x64/release/bundle/keyboard_studio`
 - **Binary Format**: ELF 64-bit LSB PIE executable, x86-64, dynamically linked.
 - **Embedded Engine**: Flutter Engine with Impeller OpenGL backend.
 
@@ -50,7 +50,7 @@
 
 - **Command**: `./linux/packaging/build_appimage.sh`
 - **Exit Code**: `0`
-- **Distribution Output**: `dist/MK1300-V2-x86_64.AppImage` (Size: ~13 MB)
+- **Distribution Output**: `dist/KeyboardStudio-x86_64.AppImage` (Size: ~13 MB)
 - **Checksum File**: `dist/SHA256SUMS`
 - **SHA-256 Digest**: `463935c0eaa93534fc1568d9400ba03da8a079c042fff52599d95bb0cb68c67e`
 - **Runtime Execution Verification**:

@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mk1300_v2/features/dashboard/presentation/dashboard_page.dart';
-import 'package:mk1300_v2/features/key_remapping/models/key_geometry.dart';
-import 'package:mk1300_v2/features/key_remapping/presentation/keyboard_visualizer.dart';
-import 'package:mk1300_v2/hardware/hid/mock_hid_device.dart';
-import 'package:mk1300_v2/hardware/services/keyboard_service.dart';
+import 'package:keyboard_studio/features/dashboard/presentation/dashboard_page.dart';
+import 'package:keyboard_studio/features/key_remapping/models/key_geometry.dart';
+import 'package:keyboard_studio/features/key_remapping/presentation/keyboard_visualizer.dart';
+import 'package:keyboard_studio/hardware/hid/mock_hid_device.dart';
+import 'package:keyboard_studio/hardware/services/keyboard_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -138,7 +138,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify dashboard headers & status
-      expect(find.text('Ant Esports MK1300 V2'), findsOneWidget);
+      expect(find.text('Keyboard Studio'), findsOneWidget);
       expect(find.text('Interactive 61-Key Keyboard Visualizer'), findsOneWidget);
       expect(find.text('Simulated Device Mode Active: Physical keyboard is not connected. All visualizer, lighting, and macro features are fully functional in simulation.'), findsOneWidget);
       expect(find.text('SIMULATOR'), findsOneWidget);

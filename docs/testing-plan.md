@@ -1,4 +1,4 @@
-# Testing & Verification Plan: Ant Esports MK1300 V2
+# Testing & Verification Plan: MK1300 V2
 
 ## 1. Scope & Strategy
 

@@ -1,4 +1,4 @@
-/// All 22 recovered preset lighting effects for Ant Esports MK1300 V2.
+/// All 22 recovered preset lighting effects for MK1300 V2.
 /// Source: `assets/data/36ae_fe12.json` (chunk 2853) & language pack chunk 1249.
 ///
 /// Each enum value includes:

@@ -1,4 +1,4 @@
-# Application Feature Inventory: Ant Esports MK1300 V2
+# Application Feature Inventory: MK1300 V2
 
 ## 1. Feature Matrix & Implementation Verification Status
 

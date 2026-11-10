@@ -1,12 +1,12 @@
-# Final Technical Specification: Ant Esports MK1300 V2 Linux Desktop Application
+# Final Technical Specification: MK1300 V2 Linux Desktop Application
 
 ## 1. Document Overview & Scope
 
 ### 1.1 Purpose
-This document constitutes the definitive, internally consistent technical implementation specification for the **Ant Esports MK1300 V2 Linux Desktop Application**. It synthesizes all reverse-engineering findings, protocol specifications, data structures, and user experience requirements into a comprehensive guide for Linux-first development.
+This document constitutes the definitive, internally consistent technical implementation specification for the **MK1300 V2 Linux Desktop Application**. It synthesizes all reverse-engineering findings, protocol specifications, data structures, and user experience requirements into a comprehensive guide for Linux-first development.
 
 ### 1.2 Target Hardware
-- **Hardware**: Ant Esports MK1300 V2 Mechanical Gaming Keyboard (61-Key ARGB, ANSI 60% Form Factor).
+- **Hardware**: MK1300 V2 Mechanical Gaming Keyboard (61-Key ARGB, ANSI 60% Form Factor).
 - **Controller**: Vision / YinHua 9520 USB HID Microcontroller.
 - **Hardware Architecture**: USB wired and 2.4GHz/BT wireless dual-mode controller with onboard flash memory (EEPROM).
 
@@ -40,7 +40,7 @@ This document constitutes the definitive, internally consistent technical implem
 
 | Parameter | Specification | Evidence Classification | Verification Reference |
 |---|---|---|---|
-| **Device Model** | Ant Esports MK1300 V2 | **Source-verified** | `main/assets/vid_pid_offline.js` |
+| **Device Model** | MK1300 V2 | **Source-verified** | `main/assets/vid_pid_offline.js` |
 | **Internal Designation** | `RS0-61K-ARGB` | **Source-verified** | `assets/data/36ae_fe12.json` |
 | **Microcontroller (MCU)** | Vision 9520 (`mcu_type: "9520"`) | **Source-verified** | `assets/data/36ae_fe12.json` |
 | **Vendor ID (VID)** | `0x36AE` (Decimal `13998`) | **Source-verified** | `main/assets/vid_pid_offline.js` |
@@ -173,7 +173,7 @@ Byte 3: Keycode / Button Identifier
 ## 7. Linux Platform & udev Requirements
 
 ### 7.1 udev Non-Root Device Permissions
-To allow non-root users access to `/dev/hidraw*` devices, install `/etc/udev/rules.d/99-antesports-mk1300.rules`:
+To allow non-root users access to `/dev/hidraw*` devices, install `/etc/udev/rules.d/99-keyboard-studio-mk1300.rules`:
 ```udev
 KERNEL=="hidraw*", ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12", MODE="0660", TAG+="uaccess", GROUP="plugdev"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12", MODE="0660", TAG+="uaccess", GROUP="plugdev"

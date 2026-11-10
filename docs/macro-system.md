@@ -1,4 +1,4 @@
-# Macro System & Storage Format: Ant Esports MK1300 V2
+# Macro System & Storage Format: MK1300 V2
 
 ## 1. Overview
 

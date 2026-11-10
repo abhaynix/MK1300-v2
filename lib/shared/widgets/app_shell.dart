@@ -89,7 +89,7 @@ class _AppShellState extends State<AppShell> {
         children: [
           Row(
             children: [
-              Image.asset('assets/images/app_icon.ico', width: 28, height: 28, errorBuilder: (c, e, s) {
+              Image.asset('assets/images/logo.png', width: 28, height: 28, errorBuilder: (c, e, s) {
                 return const Icon(Icons.keyboard, color: AppTheme.accentCyan, size: 28);
               }),
               const SizedBox(width: 12),
@@ -98,7 +98,7 @@ class _AppShellState extends State<AppShell> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Ant Esports MK1300 V2',
+                    'Keyboard Studio',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,

@@ -1,5 +1,5 @@
-name: mk1300_v2
-description: "A new Flutter project."
+name: keyboard_studio
+description: "Keyboard Studio: RGB lighting and key-mapping utility for the MK1300 V2 keyboard."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

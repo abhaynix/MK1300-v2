@@ -1,7 +1,7 @@
-# Ant Esports MK1300 V2 - Hardware Test Results Matrix
+# MK1300 V2 - Hardware Test Results Matrix
 
 **Test Environment**: Ubuntu 26.04.1 LTS x86_64, Dart 3.13.7, Flutter 3.47.9  
-**Target Hardware**: Ant Esports MK1300 V2 (VID `0x36AE`, PID `0xFE12`, SDCX Gaming Keyboard)  
+**Target Hardware**: MK1300 V2 (VID `0x36AE`, PID `0xFE12`, SDCX Gaming Keyboard)  
 **Evaluation Date**: 2026-11-11  
 **Physical Hardware Status**: **CONNECTED & 100% IN-VIVO VERIFIED**
 

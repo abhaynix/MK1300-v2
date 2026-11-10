@@ -1,4 +1,4 @@
-# Application Workflows: Ant Esports MK1300 V2
+# Application Workflows: MK1300 V2
 
 ## 1. Workflow 1: Application Startup & Device Handshake
 

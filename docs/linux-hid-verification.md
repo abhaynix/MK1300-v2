@@ -1,8 +1,8 @@
-# Ant Esports MK1300 V2 - Linux HID Verification & Diagnostic Report
+# MK1300 V2 - Linux HID Verification & Diagnostic Report
 
 ## 1. Executive Summary
 
-This report documents the Linux platform environment audit, native USB subsystem inspection, device detection checks, permissions analysis, and C-FFI `hidapi` driver evaluation for the **Ant Esports MK1300 V2 Mechanical Gaming Keyboard** on Ubuntu Linux.
+This report documents the Linux platform environment audit, native USB subsystem inspection, device detection checks, permissions analysis, and C-FFI `hidapi` driver evaluation for the **MK1300 V2 Mechanical Gaming Keyboard** on Ubuntu Linux.
 
 **Verification Status**: Physical hardware verification remains **EXPLICITLY PENDING** (Physical keyboard is not plugged into the USB host).
 
@@ -82,7 +82,7 @@ Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
   - `/dev/hidraw5`: `044E:1222` (I2C touchpad)
 
 ### Classification
-The physical Ant Esports MK1300 V2 keyboard (`VID 0x36AE`, `PID 0xFE12`) is **not physically plugged into the test environment**. Therefore, physical USB hardware communication could not be performed, and is honestly recorded as pending.
+The physical MK1300 V2 keyboard (`VID 0x36AE`, `PID 0xFE12`) is **not physically plugged into the test environment**. Therefore, physical USB hardware communication could not be performed, and is honestly recorded as pending.
 
 ---
 
@@ -98,9 +98,9 @@ Without dedicated udev rules, ordinary non-root desktop users will receive `EACC
 ### Verified udev Configuration
 To grant non-root desktop access to the MK1300 V2:
 
-File path: `/etc/udev/rules.d/99-antesports-mk1300.rules`
+File path: `/etc/udev/rules.d/99-keyboard-studio-mk1300.rules`
 ```udev
-# Ant Esports MK1300 V2 Mechanical Gaming Keyboard (Vision 9520 MCU)
+# MK1300 V2 Mechanical Gaming Keyboard (Vision 9520 MCU)
 # Grants desktop session read/write access to vendor control interface
 
 KERNEL=="hidraw*", ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12", MODE="0660", TAG+="uaccess", GROUP="plugdev"
@@ -110,7 +110,7 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12", MODE="0660"
 ### Installation, Reload, & Removal Procedure
 1. **Install Rule**:
    ```bash
-   sudo cp 99-antesports-mk1300.rules /etc/udev/rules.d/
+   sudo cp 99-keyboard-studio-mk1300.rules /etc/udev/rules.d/
    ```
 2. **Reload udev**:
    ```bash
@@ -120,7 +120,7 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12", MODE="0660"
 3. **Reconnect**: Unplug and reconnect the USB keyboard.
 4. **Remove Rule**:
    ```bash
-   sudo rm /etc/udev/rules.d/99-antesports-mk1300.rules
+   sudo rm /etc/udev/rules.d/99-keyboard-studio-mk1300.rules
    sudo udevadm control --reload-rules
    ```
 

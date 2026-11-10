@@ -1,11 +1,11 @@
-/// USB Hardware Identifiers for Ant Esports MK1300 V2 Keyboard
+/// USB Hardware Identifiers for MK1300 V2 Keyboard
 class UsbConstants {
   UsbConstants._();
 
-  /// Ant Esports / Vision MCU Vendor ID (Decimal: 13998)
+  /// Vision MCU Vendor ID (Decimal: 13998)
   static const int vendorId = 0x36AE;
 
-  /// Ant Esports MK1300 V2 61-Key Product ID (Decimal: 65042)
+  /// MK1300 V2 61-Key Product ID (Decimal: 65042)
   static const int productId = 0xFE12;
 
   /// Vendor-defined HID Usage Page (Decimal: 65280)

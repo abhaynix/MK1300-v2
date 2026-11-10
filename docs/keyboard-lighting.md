@@ -1,8 +1,8 @@
-# Keyboard Lighting & RGB Effects: Ant Esports MK1300 V2
+# Keyboard Lighting & RGB Effects: MK1300 V2
 
 ## 1. Overview
 
-The Ant Esports MK1300 V2 mechanical keyboard features full per-key RGB backlighting driven by the Vision 9520 MCU. The software supports **22 distinct preset lighting effects** plus custom per-key color programming.
+The MK1300 V2 mechanical keyboard features full per-key RGB backlighting driven by the Vision 9520 MCU. The software supports **22 distinct preset lighting effects** plus custom per-key color programming.
 
 ---
 

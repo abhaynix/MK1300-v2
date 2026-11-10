@@ -36,7 +36,7 @@ class DashboardPage extends StatelessWidget {
               Expanded(
                 child: _buildStatusCard(
                   icon: Icons.keyboard,
-                  title: 'Ant Esports MK1300 V2',
+                  title: 'Keyboard Studio',
                   subtitle: service.isUsingMock
                       ? 'Simulated Device (Offline)'
                       : (service.isConnected ? 'Physical Keyboard (USB)' : 'Disconnected'),

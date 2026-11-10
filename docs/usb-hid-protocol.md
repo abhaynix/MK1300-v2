@@ -1,8 +1,8 @@
-# USB HID Protocol Specification: Ant Esports MK1300 V2
+# USB HID Protocol Specification: MK1300 V2
 
 ## 1. Hardware Overview
 
-* **Keyboard Model**: Ant Esports MK1300 V2 (61-Key ARGB Compact Mechanical Gaming Keyboard)
+* **Keyboard Model**: MK1300 V2 (61-Key ARGB Compact Mechanical Gaming Keyboard)
 * **Internal Code**: `RS0-61K-ARGB`
 * **Controller MCU**: Vision / YinHua 9520 (`mcu_type: "9520"`)
 * **Vendor ID (VID)**: `0x36AE` (Decimal 13998)

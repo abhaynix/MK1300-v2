@@ -1,6 +1,6 @@
-# Ant Esports MK1300 V2 - Protocol & Command Reference
+# MK1300 V2 - Protocol & Command Reference
 
-This document provides a comprehensive, bit-exact reference of all recovered USB HID commands for the **Ant Esports MK1300 V2 Mechanical Gaming Keyboard** (Vision 9520 MCU).
+This document provides a comprehensive, bit-exact reference of all recovered USB HID commands for the **MK1300 V2 Mechanical Gaming Keyboard** (Vision 9520 MCU).
 
 ---
 

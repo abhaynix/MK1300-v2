@@ -40,6 +40,6 @@ Because Flutter is a native application framework without a web browser sandbox,
 └──────────────────────────┬─────────────────────────────┘
                            │ 64-byte Interrupt Reports
 ┌──────────────────────────▼─────────────────────────────┐
-│             Ant Esports MK1300 V2 Hardware             │
+│             MK1300 V2 Hardware             │
 └────────────────────────────────────────────────────────┘
 ```

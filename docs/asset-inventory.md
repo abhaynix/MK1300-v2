@@ -1,4 +1,4 @@
-# UI & Asset Inventory: Ant Esports MK1300 V2
+# UI & Asset Inventory: MK1300 V2
 
 ## 1. Icon & Visual Assets Recovered
 

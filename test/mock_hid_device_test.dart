@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mk1300_v2/core/constants/usb_constants.dart';
-import 'package:mk1300_v2/hardware/hid/device_connection_state.dart';
-import 'package:mk1300_v2/hardware/hid/hid_device.dart';
-import 'package:mk1300_v2/hardware/hid/mock_hid_device.dart';
-import 'package:mk1300_v2/hardware/services/keyboard_service.dart';
+import 'package:keyboard_studio/core/constants/usb_constants.dart';
+import 'package:keyboard_studio/hardware/hid/device_connection_state.dart';
+import 'package:keyboard_studio/hardware/hid/hid_device.dart';
+import 'package:keyboard_studio/hardware/hid/mock_hid_device.dart';
+import 'package:keyboard_studio/hardware/services/keyboard_service.dart';
 
 void main() {
   group('HID Hardware Abstraction & Mock Provider Tests', () {

@@ -60,7 +60,7 @@ class MockHidDevice implements HidDevice {
   int get productId => UsbConstants.productId;
 
   @override
-  String get productName => 'Ant Esports MK1300 V2 (Simulated)';
+  String get productName => 'MK1300 V2 (Simulated)';
 
   int get batteryLevel => _batteryLevel;
 

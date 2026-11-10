@@ -1,7 +1,7 @@
 import 'package:flutter/painting.dart';
 import 'hsv_color.dart';
 
-/// Comprehensive color conversion utilities for Ant Esports MK1300 V2.
+/// Comprehensive color conversion utilities for MK1300 V2.
 /// Bridges pure Dart [HsvColor], Flutter framework [Color], hex strings, and MCU firmware bytes.
 class ColorUtils {
   ColorUtils._();
@@ -69,7 +69,7 @@ class ColorUtils {
     return Color.fromARGB(a, clampedR, clampedG, clampedB);
   }
 
-  /// Recovered 8 preset color palette swatches from original Ant Esports MK1300 V2 software.
+  /// Recovered 8 preset color palette swatches from original MK1300 V2 software.
   /// Source-verified from `chunk 1249` / `36ae_fe12.json`: Red, Orange, Yellow, Green, Cyan, Blue, Purple, White.
   static const List<Color> presetPalette = [
     Color(0xFFFF0000), // Red

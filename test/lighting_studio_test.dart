@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mk1300_v2/features/key_remapping/models/key_geometry.dart';
-import 'package:mk1300_v2/features/lighting/models/lighting_mode.dart';
-import 'package:mk1300_v2/features/lighting/models/lighting_state.dart';
-import 'package:mk1300_v2/features/lighting/services/lighting_preview_engine.dart';
-import 'package:mk1300_v2/features/lighting/presentation/lighting_page.dart';
-import 'package:mk1300_v2/hardware/services/keyboard_service.dart';
-import 'package:mk1300_v2/hardware/hid/mock_hid_device.dart';
+import 'package:keyboard_studio/features/key_remapping/models/key_geometry.dart';
+import 'package:keyboard_studio/features/lighting/models/lighting_mode.dart';
+import 'package:keyboard_studio/features/lighting/models/lighting_state.dart';
+import 'package:keyboard_studio/features/lighting/services/lighting_preview_engine.dart';
+import 'package:keyboard_studio/features/lighting/presentation/lighting_page.dart';
+import 'package:keyboard_studio/hardware/services/keyboard_service.dart';
+import 'package:keyboard_studio/hardware/hid/mock_hid_device.dart';
 
 void main() {
   group('Lighting Studio Model & Engine Tests', () {

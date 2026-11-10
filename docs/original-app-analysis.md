@@ -1,8 +1,8 @@
-# Original Application Analysis: Ant Esports MK1300 V2
+# Original Application Analysis: MK1300 V2
 
 ## 1. Executive Summary
 
-The original application is **MK1300 V2 Keyboard Software** (Version 1.0.0, © 2026 Ant Esports), distributed as a single Windows executable installer `MK1300-V21-0-0.exe` (89,058,823 bytes).
+The original application is **MK1300 V2 Keyboard Software** (Version 1.0.0, © 2026 vendor), distributed as a single Windows executable installer `MK1300-V21-0-0.exe` (89,058,823 bytes).
 
 Static reverse engineering using **REA (Reverse Engineer Anything)** and binary decompilation reveals that the software is an **Electron x64 Windows desktop application** with an internal **Next.js (React 18 / Chakra UI / Tailwind CSS)** single-page application communicating directly with the hardware via Chromium's **WebHID API** (`navigator.hid`).
 
@@ -52,7 +52,7 @@ MK1300-V2/
 | **UI Component Library**| Chakra UI + Tailwind CSS | Buttons, modals, tabs, forms, sliders |
 | **Icons / Assets** | SVG + PNG + Canvas | Keyboard visualizer & menu icons |
 | **Hardware Bridge** | Chromium WebHID (`navigator.hid`) | USB HID report packet transmission |
-| **Hardware Target** | Vision/YinHua 9520 MCU / Ant Esports MK1300 V2 | 61-Key ARGB Mechanical Gaming Keyboard |
+| **Hardware Target** | Vision/YinHua 9520 MCU / MK1300 V2 | 61-Key ARGB Mechanical Gaming Keyboard |
 
 ---
 
@@ -103,7 +103,7 @@ The architecture of the original application can be summarized as:
 └──────────────────────────┼─────────────────────────────┘
                            │ USB HID 64-byte Reports
 ┌──────────────────────────▼─────────────────────────────┐
-│    Ant Esports MK1300 V2 (VID: 0x36AE, PID: 0xFE12)    │
+│    MK1300 V2 (VID: 0x36AE, PID: 0xFE12)    │
 │              Vision 9520 MCU Hardware                  │
 └────────────────────────────────────────────────────────┘
 ```

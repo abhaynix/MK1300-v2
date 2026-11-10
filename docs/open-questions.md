@@ -1,4 +1,4 @@
-# Ant Esports MK1300 V2 - Open Questions & Hardware Unknowns
+# MK1300 V2 - Open Questions & Hardware Unknowns
 
 This document catalogs technical ambiguities, hardware-specific unknowns, and protocol edge cases identified during reverse engineering and Linux environment testing.
 
@@ -28,7 +28,7 @@ This document catalogs technical ambiguities, hardware-specific unknowns, and pr
 
 ### 2.1 Physical Hardware Absence on Test Host
 - **Status**: **BLOCKED**
-- **Details**: The physical Ant Esports MK1300 V2 keyboard (`VID 0x36AE`, `PID 0xFE12`) was not plugged into the Ubuntu Linux test environment during Phase 4 verification. Physical device enumeration, descriptor dump, non-root access verification, and live response byte capture could not be conducted without the physical device.
+- **Details**: The physical MK1300 V2 keyboard (`VID 0x36AE`, `PID 0xFE12`) was not plugged into the Ubuntu Linux test environment during Phase 4 verification. Physical device enumeration, descriptor dump, non-root access verification, and live response byte capture could not be conducted without the physical device.
 
 ### 2.2 Wireless Battery Voltage Curve & ADC Linearization
 - **Evidence**: `CMD 0x06, 0x05` returns a byte at offset 8 representing battery level (0–100) and byte 9 representing charging status (0 or 1).

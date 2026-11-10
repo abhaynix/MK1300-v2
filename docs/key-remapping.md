@@ -1,4 +1,4 @@
-# Key Remapping & Layer System: Ant Esports MK1300 V2
+# Key Remapping & Layer System: MK1300 V2
 
 ## 1. Keyboard Form Factor & Key Matrix
 

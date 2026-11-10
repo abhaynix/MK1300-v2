@@ -1,6 +1,6 @@
-# Ant Esports MK1300 V2 - Linux Packaging & Distribution Guide
+# MK1300 V2 - Linux Packaging & Distribution Guide
 
-This document describes the packaging architecture, build pipeline, shared library dependencies, udev permissions, and deployment procedures for the Ant Esports MK1300 V2 Linux Desktop Application.
+This document describes the packaging architecture, build pipeline, shared library dependencies, udev permissions, and deployment procedures for the MK1300 V2 Linux Desktop Application.
 
 ---
 
@@ -10,9 +10,9 @@ The packaging pipeline produces standalone Linux artifacts in the `dist/` direct
 
 | File | Purpose | Size | SHA-256 Checksum |
 | :--- | :--- | :--- | :--- |
-| `dist/MK1300-V2-x86_64.AppImage` | Standalone executable AppImage bundle | ~13 MB | `463935c0eaa93534fc1568d9400ba03da8a079c042fff52599d95bb0cb68c67e` |
+| `dist/KeyboardStudio-x86_64.AppImage` | Standalone executable AppImage bundle | ~13 MB | `463935c0eaa93534fc1568d9400ba03da8a079c042fff52599d95bb0cb68c67e` |
 | `dist/SHA256SUMS` | Cryptographic checksums | 92 B | - |
-| `dist/99-ant-esports-mk1300.rules` | System udev permission rules for USB HID | 1.5 KB | - |
+| `dist/99-keyboard-studio-mk1300.rules` | System udev permission rules for USB HID | 1.5 KB | - |
 
 ---
 
@@ -25,9 +25,9 @@ The application is packaged into an **AppImage Type 2** container with zstd squa
 ```text
 build/AppDir/
 ├── AppRun                                     # Executable entrypoint script
-├── mk1300_v2                                  # Native compiled ELF 64-bit Flutter binary
-├── mk1300_v2.desktop                          # FreeDesktop application launcher entry
-├── mk1300_v2.png                              # 256x256 Hi-DPI application icon
+├── keyboard_studio                                  # Native compiled ELF 64-bit Flutter binary
+├── dev.exdevx.keyboard_studio.desktop                          # FreeDesktop application launcher entry
+├── dev.exdevx.keyboard_studio.png                              # 256x256 Hi-DPI application icon
 ├── .DirIcon                                   # AppImage icon symlink/copy
 ├── data/                                      # Flutter asset bundles (layout JSON, icons, fonts)
 │   ├── flutter_assets/
@@ -44,21 +44,21 @@ build/AppDir/
 │   ├── libhidapi-libusb.so.0 -> ...           # Versioned symlink
 │   └── libhidapi-libusb.so -> ...             # Unversioned symlink
 ├── etc/udev/rules.d/
-│   └── 99-ant-esports-mk1300.rules            # Embedded udev rules reference
+│   └── 99-keyboard-studio-mk1300.rules            # Embedded udev rules reference
 └── usr/
     ├── bin/
     ├── lib/
     ├── lib/udev/rules.d/
     └── share/
-        ├── applications/mk1300_v2.desktop
-        └── icons/hicolor/256x256/apps/mk1300_v2.png
+        ├── applications/dev.exdevx.keyboard_studio.desktop
+        └── icons/hicolor/256x256/apps/dev.exdevx.keyboard_studio.png
 ```
 
 ---
 
 ## 3. Shared Library Dependency Audit
 
-Running `ldd` on the release binary (`build/linux/x64/release/bundle/mk1300_v2`) yields:
+Running `ldd` on the release binary (`build/linux/x64/release/bundle/keyboard_studio`) yields:
 
 - **System Core Libraries** (Standard across all modern Linux distributions):
   - `libc.so.6`, `libm.so.6`, `libpthread.so.0`, `libdl.so.2` (glibc 2.35+)
@@ -88,7 +88,7 @@ export APPDIR="${HERE}"
 export LD_LIBRARY_PATH="${APPDIR}/lib:${LD_LIBRARY_PATH}"
 export XDG_DATA_DIRS="${APPDIR}/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 
-exec "${APPDIR}/mk1300_v2" "$@"
+exec "${APPDIR}/keyboard_studio" "$@"
 ```
 
 ---
@@ -97,10 +97,10 @@ exec "${APPDIR}/mk1300_v2" "$@"
 
 Linux protects `/dev/hidraw*` devices by default, restricting access to `root`. To permit seamless, non-root communication with the MK1300 V2 keyboard, install the provided udev rule file:
 
-### File: `linux/packaging/99-ant-esports-mk1300.rules`
+### File: `linux/packaging/99-keyboard-studio-mk1300.rules`
 
 ```udev
-# Ant Esports MK1300 V2 Mechanical Gaming Keyboard
+# MK1300 V2 Mechanical Gaming Keyboard
 # Vendor ID (VID): 0x36AE, Product ID (PID): 0xFE12
 
 # HIDRAW subsystem rules (used by hidapi-hidraw)
@@ -114,7 +114,7 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12", MODE="0660"
 
 1. Copy the rule file to the system udev directory:
    ```bash
-   sudo cp dist/99-ant-esports-mk1300.rules /etc/udev/rules.d/
+   sudo cp dist/99-keyboard-studio-mk1300.rules /etc/udev/rules.d/
    ```
 2. Reload and trigger udev:
    ```bash
@@ -127,21 +127,21 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="36ae", ATTRS{idProduct}=="fe12", MODE="0660"
 
 ## 5. FreeDesktop Desktop Entry Specification
 
-File: `linux/packaging/mk1300_v2.desktop`
+File: `linux/packaging/dev.exdevx.keyboard_studio.desktop`
 
 ```ini
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Ant Esports MK1300 V2
+Name=MK1300 V2
 GenericName=Gaming Keyboard Manager
-Comment=Configuration software for Ant Esports MK1300 V2 Mechanical Gaming Keyboard
-Exec=mk1300_v2 %u
-Icon=mk1300_v2
+Comment=Configuration software for MK1300 V2 Mechanical Gaming Keyboard
+Exec=keyboard_studio %u
+Icon=keyboard_studio
 Terminal=false
 Categories=Utility;HardwareSettings;Settings;
-Keywords=ant;esports;keyboard;rgb;lighting;gaming;macro;remapping;mk1300;
-StartupWMClass=mk1300_v2
+Keywords=keyboard;rgb;lighting;gaming;macro;remapping;mk1300;
+StartupWMClass=keyboard_studio
 ```
 
 ---
@@ -158,5 +158,5 @@ The script will:
 1. Verify or execute `flutter build linux --release`.
 2. Populate `build/AppDir/` with binaries, assets, AppRun, desktop entries, and icons.
 3. Automatically bundle `libhidapi` shared libraries.
-4. Use `linux/packaging/runtime-x86_64` and `appimagetool` to package `dist/MK1300-V2-x86_64.AppImage`.
+4. Use `linux/packaging/runtime-x86_64` and `appimagetool` to package `dist/KeyboardStudio-x86_64.AppImage`.
 5. Compute and update `dist/SHA256SUMS`.

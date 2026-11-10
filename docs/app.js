@@ -1,5 +1,5 @@
 /**
- * Ant Esports MK1300 V2 - Showcase Website JavaScript Engine
+ * MK1300 V2 - Showcase Website JavaScript Engine
  * Provides live 61-key keyboard visualization, RGB lighting effects, and clipboard actions.
  */
 

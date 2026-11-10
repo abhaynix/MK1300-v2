@@ -1,14 +1,14 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mk1300_v2/core/constants/usb_constants.dart';
-import 'package:mk1300_v2/features/macros/models/macro_action.dart';
-import 'package:mk1300_v2/features/macros/models/macro_model.dart';
-import 'package:mk1300_v2/features/macros/presentation/macro_page.dart';
-import 'package:mk1300_v2/features/macros/services/macro_compiler.dart';
-import 'package:mk1300_v2/hardware/hid/hid_device.dart';
-import 'package:mk1300_v2/hardware/hid/mock_hid_device.dart';
-import 'package:mk1300_v2/hardware/services/keyboard_service.dart';
+import 'package:keyboard_studio/core/constants/usb_constants.dart';
+import 'package:keyboard_studio/features/macros/models/macro_action.dart';
+import 'package:keyboard_studio/features/macros/models/macro_model.dart';
+import 'package:keyboard_studio/features/macros/presentation/macro_page.dart';
+import 'package:keyboard_studio/features/macros/services/macro_compiler.dart';
+import 'package:keyboard_studio/hardware/hid/hid_device.dart';
+import 'package:keyboard_studio/hardware/hid/mock_hid_device.dart';
+import 'package:keyboard_studio/hardware/services/keyboard_service.dart';
 
 /// Fake physical HID device for testing safety gate blocking without physical USB hardware.
 class _FakePhysicalHidDevice implements HidDevice {
@@ -25,7 +25,7 @@ class _FakePhysicalHidDevice implements HidDevice {
   int get productId => UsbConstants.productId;
 
   @override
-  String get productName => 'Ant Esports MK1300 V2 (Physical Mock)';
+  String get productName => 'MK1300 V2 (Physical Mock)';
 
   @override
   Stream<Uint8List> get reportStream => const Stream.empty();

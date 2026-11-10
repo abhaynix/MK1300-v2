@@ -21,7 +21,7 @@ class Mk1300App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ant Esports MK1300 V2',
+      title: 'Keyboard Studio',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: AppShell(keyboardService: keyboardService),

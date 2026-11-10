@@ -1,4 +1,4 @@
-# Data Model & State Structures: Ant Esports MK1300 V2
+# Data Model & State Structures: MK1300 V2
 
 ## 1. Hardware Configuration Model (`KeyboardConfig`)
 
