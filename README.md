@@ -8,6 +8,8 @@
   A native Linux utility for RGB lighting, key remapping and macros on the MK1300 V2 keyboard.
 </p>
 
+> **Website:** https://abhaynix.github.io/MK1300-v2/
+>
 > **Independent project.** Keyboard Studio is not affiliated with, endorsed by, or
 > sponsored by Ant Esports. "MK1300 V2" is used only to identify compatible hardware.
 > See [NOTICE.md](NOTICE.md).
