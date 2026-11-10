@@ -330,7 +330,7 @@ class PacketBuilder {
   /// Parses response to CMD 0x06, Sub 0x0A into [LightingConfig].
   static LightingConfig? parseLightingResponse(Uint8List response) {
     if (response.length < 16) return null;
-    if (response[0] != UsbConstants.rootOpcode || response[1] != 0x0A) {
+    if ((response[0] != UsbConstants.rootOpcode && response[0] != 0xAA) || response[1] != 0x0A) {
       return null;
     }
     final type = response[5];

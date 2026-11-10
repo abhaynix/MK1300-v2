@@ -145,6 +145,8 @@ class LinuxHidDevice implements HidDevice {
     }
   }
 
+  Completer<Uint8List?>? _pendingReadCompleter;
+
   /// Enumerates connected USB devices on Linux matching Ant Esports MK1300 V2.
   static List<LinuxHidDevice> enumerateDevices({
     int vid = UsbConstants.vendorId,
@@ -158,17 +160,25 @@ class LinuxHidDevice implements HidDevice {
 
     while (current != nullptr) {
       final info = current.ref;
-      // Match vendor control interface (interface 1 or usagePage 0xFF00)
-      if (info.interfaceNumber == UsbConstants.controlInterface ||
-          info.usagePage == UsbConstants.usagePage ||
-          info.usagePage == 0) {
-        final pathStr = info.path.toDartString();
-        results.add(LinuxHidDevice(
+      final pathStr = info.path.toDartString();
+      // Match vendor control interface (usagePage 0xFF00, or interface 1/2)
+      // Prioritize vendor-defined usagePage 0xFF00 or interfaceNumber == controlInterface
+      final isVendorControl = info.usagePage == UsbConstants.usagePage ||
+          info.interfaceNumber == UsbConstants.controlInterface;
+
+      if (isVendorControl || info.usagePage == 0) {
+        final device = LinuxHidDevice(
           vendorId: info.vendorId,
           productId: info.productId,
           productName: 'Ant Esports MK1300 V2',
           devicePath: pathStr,
-        ));
+        );
+        // Put vendor-specific matches at the front of the list
+        if (isVendorControl) {
+          results.insert(0, device);
+        } else {
+          results.add(device);
+        }
       }
       current = info.next;
     }
@@ -204,8 +214,12 @@ class LinuxHidDevice implements HidDevice {
           final res = _hidReadTimeout!(_handle!, buf, 64, 50);
           if (res > 0) {
             final data = Uint8List.fromList(buf.asTypedList(res));
-            // Check for unsolicited hardware events (0xAA, 0xFA)
-            if (data.length >= 2 &&
+            // Dispatch to awaiting command reader if present
+            if (_pendingReadCompleter != null && !_pendingReadCompleter!.isCompleted) {
+              final completer = _pendingReadCompleter!;
+              _pendingReadCompleter = null;
+              completer.complete(data);
+            } else if (data.length >= 2 &&
                 data[0] == UsbConstants.eventHeaderByte0 &&
                 data[1] == UsbConstants.eventHeaderByte1) {
               _reportStreamController.add(data);
@@ -239,17 +253,22 @@ class LinuxHidDevice implements HidDevice {
 
   @override
   Future<Uint8List?> readReport({int timeoutMs = 1000}) async {
-    if (!isOpen || _hidReadTimeout == null) return null;
+    if (!isOpen) return null;
+    final completer = Completer<Uint8List?>();
+    _pendingReadCompleter = completer;
 
-    final buf = calloc<Uint8>(64);
     try {
-      final res = _hidReadTimeout!(_handle!, buf, 64, timeoutMs);
-      if (res > 0) {
-        return Uint8List.fromList(buf.asTypedList(res));
-      }
+      return await completer.future.timeout(
+        Duration(milliseconds: timeoutMs),
+        onTimeout: () {
+          if (_pendingReadCompleter == completer) {
+            _pendingReadCompleter = null;
+          }
+          return null;
+        },
+      );
+    } catch (_) {
       return null;
-    } finally {
-      calloc.free(buf);
     }
   }
 
