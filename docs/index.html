@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Keyboard Studio - Linux Software for the MK1300 V2</title>
+  <meta name="description" content="Native Linux software for the MK1300 V2 mechanical keyboard. Independent project, not affiliated with Ant Esports. 61-key visualizer, 22 RGB modes, key remapping, and 4KB EEPROM macros.">
   <link rel="canonical" href="https://abhaynix.github.io/MK1300-v2/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Keyboard Studio - Linux Software for the MK1300 V2">
   <meta property="og:url" content="https://abhaynix.github.io/MK1300-v2/">
   <meta property="og:image" content="https://abhaynix.github.io/MK1300-v2/assets/icon.png">
-  <meta name="description" content="Native Linux desktop software for the MK1300 V2 mechanical keyboard. Accurate 61-key visualizer, 22 RGB modes, key remapping, and 4KB EEPROM macros.">
   <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -47,11 +47,11 @@
       </div>
 
       <h1 class="hero-title">
-        The Linux desktop software for <span class="highlight">MK1300 V2</span>
+        The Linux desktop software for the <span class="highlight">MK1300 V2 keyboard</span>
       </h1>
 
       <p class="hero-lead">
-        A fast, native Linux desktop application engineered to replace the legacy Windows Electron software with a <span class="highlight">13 megabyte AppImage</span> and direct USB HID communication.
+        A fast, native Linux desktop application built to replace the legacy Windows Electron software with a <span class="highlight">single-file AppImage</span> and direct USB HID communication.
       </p>
 
       <div class="hero-actions">
@@ -71,7 +71,7 @@
       <div class="section-header">
         <h2 class="section-title">Interactive 61-key visualizer</h2>
         <p class="section-sub">
-          Experience the recovered ANSI 60% matrix layout in real-time. Click any keycap or switch lighting effects below.
+          Explore the ANSI 60% matrix layout in real time. Click any keycap or switch lighting effects below.
         </p>
       </div>
 
@@ -96,7 +96,7 @@
         <!-- 61-Key Interactive Grid -->
         <div class="keyboard-stage">
           <div class="keyboard-case" id="keyboard">
-            <!-- Rendered by app.js from the recovered 36ae_fe12 geometry -->
+            <!-- Rendered by app.js from the 36ae_fe12 layout geometry -->
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@
       <div class="section-header">
         <h2 class="section-title">Engineered for precision and restraint</h2>
         <p class="section-sub">
-          Every hardware register, packet offset, and keymap boundary is verified against recovered source code.
+          Register offsets, packet layouts, and keymap boundaries are documented in the project's protocol reference.
         </p>
       </div>
 
@@ -119,7 +119,7 @@
           </div>
           <h3 class="card-title">Accurate 61-key visualizer</h3>
           <p class="card-desc">
-            Constructed directly from the recovered <span class="highlight">ANSI 60 percent layout</span> geometry with 5 rows, 15 matrix columns, and true keycap aspect ratios.
+            Built from the <span class="highlight">ANSI 60 percent layout</span> geometry, with 5 rows, 15 matrix columns, and true keycap aspect ratios.
           </p>
         </div>
 
@@ -130,7 +130,7 @@
           </div>
           <h3 class="card-title">Lighting studio and HSV engine</h3>
           <p class="card-desc">
-            Access all 22 verified hardware animation modes, 5 brightness levels, speed adjustments, and a <span class="highlight">pure Dart color engine</span>.
+            Access all 22 hardware animation modes, 5 brightness levels, speed adjustments, and a <span class="highlight">pure Dart color engine</span>.
           </p>
         </div>
 
@@ -152,7 +152,7 @@
           </div>
           <h3 class="card-title">Macro studio and 4KB EEPROM</h3>
           <p class="card-desc">
-            Compile 16 macro slots into the exact 4096-byte hardware EEPROM binary format with <span class="highlight">millisecond action delays</span> and loop modes.
+            Compile 16 macro slots into the 4096-byte EEPROM binary format, with <span class="highlight">millisecond action delays</span> and loop modes.
           </p>
         </div>
 
@@ -163,7 +163,7 @@
           </div>
           <h3 class="card-title">Hardware safety gate</h3>
           <p class="card-desc">
-            Physical hardware writes are strictly gated by default to protect your keyboard, backed by an <span class="highlight">offline hardware simulator</span>.
+            Physical hardware writes are <span class="highlight">gated by default</span> to protect your keyboard, with an offline hardware simulator for development.
           </p>
         </div>
 
@@ -174,7 +174,7 @@
           </div>
           <h3 class="card-title">ChaiUI design system</h3>
           <p class="card-desc">
-            Restrained, dark aesthetic crafted with warm hairline borders, quiet cream typography, and <span class="highlight">asymmetric corner buttons</span>.
+            Restrained dark aesthetic with warm hairline borders, quiet cream typography, and <span class="highlight">asymmetric corner buttons</span>.
           </p>
         </div>
       </div>
@@ -185,30 +185,30 @@
       <div class="section-header">
         <h2 class="section-title">Quick start on Linux</h2>
         <p class="section-sub">
-          Download the standalone AppImage and configure USB permissions in two simple steps.
+          Download the AppImage and the install script, then run the script. It verifies the checksum, adds a launcher entry, and sets up USB access.
         </p>
       </div>
 
       <div class="install-cards">
-        <!-- Step 1: Run AppImage -->
+        <!-- Step 1: Installer -->
         <div class="card install-card">
           <div class="step-badge">Step 1</div>
-          <h3 class="card-title">Run the AppImage</h3>
-          <p class="card-desc">Make the AppImage executable and launch it directly on any modern 64-bit Linux distribution:</p>
+          <h3 class="card-title">Run the installer</h3>
+          <p class="card-desc">Review the script, then install the AppImage for your user account. It asks for sudo only to add the udev rule:</p>
           <div class="code-block">
-            <code>chmod +x KeyboardStudio-x86_64.AppImage<br>./KeyboardStudio-x86_64.AppImage</code>
-            <button class="copy-btn" data-copy="chmod +x KeyboardStudio-x86_64.AppImage && ./KeyboardStudio-x86_64.AppImage">Copy</button>
+            <code>less install.sh<br>./install.sh KeyboardStudio-x86_64.AppImage</code>
+            <button class="copy-btn" data-copy="./install.sh KeyboardStudio-x86_64.AppImage">Copy</button>
           </div>
         </div>
 
-        <!-- Step 2: Install udev Rules -->
+        <!-- Step 2: Manual udev -->
         <div class="card install-card">
           <div class="step-badge">Step 2</div>
-          <h3 class="card-title">Install udev rules</h3>
-          <p class="card-desc">Grant unprivileged user access to the USB HID interface without running the app as root:</p>
+          <h3 class="card-title">Manual USB access (optional)</h3>
+          <p class="card-desc">Only needed if you installed with <code>SKIP_UDEV=1</code>. Grants non-root access to the keyboard's HID interface:</p>
           <div class="code-block">
-            <code>sudo cp 99-keyboard-studio-mk1300.rules /etc/udev/rules.d/<br>sudo udevadm control --reload-rules && sudo udevadm trigger</code>
-            <button class="copy-btn" data-copy="sudo cp 99-keyboard-studio-mk1300.rules /etc/udev/rules.d/ && sudo udevadm control --reload-rules && sudo udevadm trigger">Copy</button>
+            <code>sudo install -m 0644 99-keyboard-studio-mk1300.rules /etc/udev/rules.d/<br>sudo udevadm control --reload-rules && sudo udevadm trigger</code>
+            <button class="copy-btn" data-copy="sudo install -m 0644 99-keyboard-studio-mk1300.rules /etc/udev/rules.d/ && sudo udevadm control --reload-rules && sudo udevadm trigger">Copy</button>
           </div>
         </div>
       </div>
@@ -220,8 +220,8 @@
   <footer class="footer">
     <div class="footer-container">
       <div class="footer-info">
-        <span class="footer-brand">MK1300 V2 Linux Software</span>
-        <span class="footer-note">Built with Flutter, Dart C-FFI, and the ChaiUI design system.</span>
+        <span class="footer-brand">Keyboard Studio for the MK1300 V2</span>
+        <span class="footer-note">Independent project. Not affiliated with Ant Esports. Built with Flutter, Dart C-FFI, and the ChaiUI design system.</span>
       </div>
       <div class="footer-links">
         <a href="https://github.com/abhaynix/MK1300-v2" target="_blank" rel="noopener">GitHub Repository</a>
