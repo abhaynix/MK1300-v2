@@ -1,69 +1,70 @@
 #!/bin/bash
-set -e
+# Keyboard Studio: AppImage packaging.
+#
+# Builds the Flutter release bundle if it is missing, assembles an AppDir,
+# bundles libhidapi, and packs dist/KeyboardStudio-x86_64.AppImage.
+#
+# appimagetool is located via $APPIMAGETOOL, then PATH, then ./tools/appimagetool.
+set -euo pipefail
 
-# ==============================================================================
-# Ant Esports MK1300 V2 - AppImage Build & Packaging Script
-# ==============================================================================
+APP_ID="dev.exdevx.keyboard_studio"
+BINARY_NAME="keyboard_studio"
+APP_NAME="KeyboardStudio"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 BUNDLE_DIR="${PROJECT_ROOT}/build/linux/x64/release/bundle"
 APPDIR="${PROJECT_ROOT}/build/AppDir"
 DIST_DIR="${PROJECT_ROOT}/dist"
-APPIMAGE_OUTPUT="${DIST_DIR}/MK1300-V2-x86_64.AppImage"
-RUNTIME_FILE="${PROJECT_ROOT}/linux/packaging/runtime-x86_64"
+APPIMAGE_OUTPUT="${DIST_DIR}/${APP_NAME}-x86_64.AppImage"
+RUNTIME_FILE="${SCRIPT_DIR}/runtime-x86_64"
 
-echo "=== Building Ant Esports MK1300 V2 AppImage ==="
-echo "Project Root: ${PROJECT_ROOT}"
-echo "Bundle Dir:   ${BUNDLE_DIR}"
-echo "AppDir:       ${APPDIR}"
-echo "Dist Dir:     ${DIST_DIR}"
+find_appimagetool() {
+    if [ -n "${APPIMAGETOOL:-}" ] && [ -x "${APPIMAGETOOL}" ]; then
+        echo "${APPIMAGETOOL}"; return 0
+    fi
+    if command -v appimagetool >/dev/null 2>&1; then
+        command -v appimagetool; return 0
+    fi
+    if [ -x "${PROJECT_ROOT}/tools/appimagetool" ]; then
+        echo "${PROJECT_ROOT}/tools/appimagetool"; return 0
+    fi
+    return 1
+}
 
-# 1. Verify or trigger release build
-if [ ! -f "${BUNDLE_DIR}/mk1300_v2" ]; then
-    echo "Release bundle not found. Building with flutter build linux --release..."
-    cd "${PROJECT_ROOT}"
-    flutter build linux --release
+echo "=== Packaging ${APP_NAME} AppImage ==="
+
+APPIMAGETOOL_BIN="$(find_appimagetool)" || {
+    echo "ERROR: appimagetool not found. Set APPIMAGETOOL=/path/to/appimagetool or put it on PATH." >&2
+    exit 1
+}
+echo "Using appimagetool: ${APPIMAGETOOL_BIN}"
+
+# 1. Release bundle
+if [ ! -f "${BUNDLE_DIR}/${BINARY_NAME}" ]; then
+    echo "Release bundle not found; running flutter build linux --release..."
+    (cd "${PROJECT_ROOT}" && flutter build linux --release)
 fi
 
-# 2. Prepare clean AppDir structure
-echo "Preparing AppDir structure..."
+# 2. Fresh AppDir
+echo "Preparing AppDir..."
 rm -rf "${APPDIR}"
-mkdir -p "${APPDIR}/usr/bin"
-mkdir -p "${APPDIR}/usr/lib"
-mkdir -p "${APPDIR}/usr/share/applications"
-mkdir -p "${APPDIR}/usr/share/icons/hicolor/256x256/apps"
-mkdir -p "${APPDIR}/usr/lib/udev/rules.d"
-mkdir -p "${APPDIR}/etc/udev/rules.d"
-mkdir -p "${APPDIR}/lib"
+mkdir -p "${APPDIR}/usr/bin" "${APPDIR}/usr/lib" "${APPDIR}/usr/share/applications" \
+         "${APPDIR}/usr/share/icons/hicolor/512x512/apps" "${APPDIR}/lib"
 
-# 3. Copy Flutter release bundle
-echo "Copying Flutter bundle files..."
+# 3. Flutter bundle and entrypoint
 cp -r "${BUNDLE_DIR}/"* "${APPDIR}/"
-
-# 4. Install AppRun entrypoint
-echo "Installing AppRun entrypoint..."
-cp "${PROJECT_ROOT}/linux/packaging/AppRun" "${APPDIR}/AppRun"
+cp "${SCRIPT_DIR}/AppRun" "${APPDIR}/AppRun"
 chmod +x "${APPDIR}/AppRun"
 
-# 5. Install Desktop File
-echo "Installing Desktop entry..."
-cp "${PROJECT_ROOT}/linux/packaging/mk1300_v2.desktop" "${APPDIR}/mk1300_v2.desktop"
-cp "${PROJECT_ROOT}/linux/packaging/mk1300_v2.desktop" "${APPDIR}/usr/share/applications/mk1300_v2.desktop"
+# 4. Desktop entry and icon (icon must be 512x512, referenced by Icon= in the desktop file)
+cp "${SCRIPT_DIR}/${APP_ID}.desktop" "${APPDIR}/${APP_ID}.desktop"
+cp "${SCRIPT_DIR}/${APP_ID}.desktop" "${APPDIR}/usr/share/applications/${APP_ID}.desktop"
+cp "${SCRIPT_DIR}/${APP_ID}.png" "${APPDIR}/${APP_ID}.png"
+cp "${SCRIPT_DIR}/${APP_ID}.png" "${APPDIR}/.DirIcon"
+cp "${SCRIPT_DIR}/${APP_ID}.png" "${APPDIR}/usr/share/icons/hicolor/512x512/apps/${APP_ID}.png"
 
-# 6. Install Icons
-echo "Installing application icons..."
-cp "${PROJECT_ROOT}/linux/packaging/mk1300_v2.png" "${APPDIR}/mk1300_v2.png"
-cp "${PROJECT_ROOT}/linux/packaging/mk1300_v2.png" "${APPDIR}/.DirIcon"
-cp "${PROJECT_ROOT}/linux/packaging/mk1300_v2.png" "${APPDIR}/usr/share/icons/hicolor/256x256/apps/mk1300_v2.png"
-
-# 7. Install udev rules
-echo "Installing udev rules..."
-cp "${PROJECT_ROOT}/linux/packaging/99-ant-esports-mk1300.rules" "${APPDIR}/usr/lib/udev/rules.d/"
-cp "${PROJECT_ROOT}/linux/packaging/99-ant-esports-mk1300.rules" "${APPDIR}/etc/udev/rules.d/"
-
-# 8. Bundle non-standard shared libraries (libhidapi)
-echo "Auditing and bundling shared libraries..."
+# 5. Bundle hidapi shared libraries (the target system may not have them)
 HIDRAW_SO=$(find /usr/lib/x86_64-linux-gnu -name "libhidapi-hidraw.so*" 2>/dev/null | grep -E '\.so(\.[0-9]+)*$' | head -n 1 || true)
 LIBUSB_SO=$(find /usr/lib/x86_64-linux-gnu -name "libhidapi-libusb.so*" 2>/dev/null | grep -E '\.so(\.[0-9]+)*$' | head -n 1 || true)
 
@@ -72,6 +73,8 @@ if [ -n "${HIDRAW_SO}" ]; then
     cp -d "${HIDRAW_SO}"* "${APPDIR}/lib/" 2>/dev/null || cp "${HIDRAW_SO}" "${APPDIR}/lib/"
     (cd "${APPDIR}/lib" && ln -sf libhidapi-hidraw.so.*.* libhidapi-hidraw.so.0 2>/dev/null || true)
     (cd "${APPDIR}/lib" && ln -sf libhidapi-hidraw.so.0 libhidapi-hidraw.so 2>/dev/null || true)
+else
+    echo "WARNING: libhidapi-hidraw not found on build host; the AppImage will need it installed." >&2
 fi
 
 if [ -n "${LIBUSB_SO}" ]; then
@@ -81,46 +84,22 @@ if [ -n "${LIBUSB_SO}" ]; then
     (cd "${APPDIR}/lib" && ln -sf libhidapi-libusb.so.0 libhidapi-libusb.so 2>/dev/null || true)
 fi
 
-# 9. Locate appimagetool
-APPIMAGETOOL_BIN=$(which appimagetool 2>/dev/null || true)
-if [ -z "${APPIMAGETOOL_BIN}" ]; then
-    if [ -x "/home/devx/.local/bin/appimagetool" ]; then
-        APPIMAGETOOL_BIN="/home/devx/.local/bin/appimagetool"
-    elif [ -x "/tmp/tools/appimagetool" ]; then
-        APPIMAGETOOL_BIN="/tmp/tools/appimagetool"
-    fi
-fi
-
-if [ -z "${APPIMAGETOOL_BIN}" ]; then
-    echo "ERROR: appimagetool executable not found in PATH, ~/.local/bin, or /tmp/tools."
-    exit 1
-fi
-
-echo "Using appimagetool: ${APPIMAGETOOL_BIN}"
-
-# 10. Package into AppImage
+# 6. udev rule ships beside the AppImage for install.sh (it is not placed inside the AppDir)
 mkdir -p "${DIST_DIR}"
-rm -f "${APPIMAGE_OUTPUT}"
+cp "${SCRIPT_DIR}/99-keyboard-studio-mk1300.rules" "${DIST_DIR}/99-keyboard-studio-mk1300.rules"
 
+# 7. Pack
+rm -f "${APPIMAGE_OUTPUT}"
 TOOL_ARGS=("-n")
 if [ -f "${RUNTIME_FILE}" ]; then
-    echo "Using offline runtime file: ${RUNTIME_FILE}"
+    echo "Using offline runtime: ${RUNTIME_FILE}"
     TOOL_ARGS+=("--runtime-file" "${RUNTIME_FILE}")
 fi
-
-echo "Packaging AppImage into ${APPIMAGE_OUTPUT}..."
+echo "Packing ${APPIMAGE_OUTPUT}..."
 ARCH=x86_64 "${APPIMAGETOOL_BIN}" --appimage-extract-and-run "${TOOL_ARGS[@]}" "${APPDIR}" "${APPIMAGE_OUTPUT}" || \
 ARCH=x86_64 "${APPIMAGETOOL_BIN}" "${TOOL_ARGS[@]}" "${APPDIR}" "${APPIMAGE_OUTPUT}"
-
 chmod +x "${APPIMAGE_OUTPUT}"
 
-# 11. Generate SHA256 checksums
-echo "Generating SHA256SUMS..."
+# 8. Checksums
 (cd "${DIST_DIR}" && sha256sum "$(basename "${APPIMAGE_OUTPUT}")" > SHA256SUMS)
-
-# Copy udev rules to dist/ for user convenience
-cp "${PROJECT_ROOT}/linux/packaging/99-ant-esports-mk1300.rules" "${DIST_DIR}/99-ant-esports-mk1300.rules"
-
-echo "=== AppImage Package Complete ==="
-ls -lh "${DIST_DIR}"
-cat "${DIST_DIR}/SHA256SUMS"
+echo "Done: ${APPIMAGE_OUTPUT}"

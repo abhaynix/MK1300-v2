@@ -1,12 +1,12 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Ant Esports MK1300 V2
-GenericName=Gaming Keyboard Manager
-Comment=Configuration software for Ant Esports MK1300 V2 Mechanical Gaming Keyboard
-Exec=mk1300_v2 %u
-Icon=mk1300_v2
+Name=Keyboard Studio
+GenericName=Keyboard Lighting & Key Mapping
+Comment=RGB lighting, key remapping and macros for the MK1300 V2 keyboard
+Exec=keyboard_studio %u
+Icon=dev.exdevx.keyboard_studio
 Terminal=false
 Categories=Utility;HardwareSettings;Settings;
-Keywords=ant;esports;keyboard;rgb;lighting;gaming;macro;remapping;mk1300;
-StartupWMClass=mk1300_v2
+Keywords=keyboard;rgb;lighting;macro;remapping;mk1300;
+StartupWMClass=keyboard_studio

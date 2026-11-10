@@ -1,4 +1,4 @@
-# Ant Esports MK1300 V2 Mechanical Gaming Keyboard
+# MK1300 V2 Mechanical Gaming Keyboard
 # USB HID Device Permissions (udev rule)
 #
 # Vendor ID (VID):  0x36AE
@@ -20,7 +20,7 @@
 #    specific keyboard hardware receives elevated access permissions.
 #
 # INSTALLATION:
-#   sudo cp 99-ant-esports-mk1300.rules /etc/udev/rules.d/
+#   sudo cp 99-keyboard-studio-mk1300.rules /etc/udev/rules.d/
 #   sudo udevadm control --reload-rules && sudo udevadm trigger
 
 # HIDRAW subsystem rules (used by hidapi-hidraw)

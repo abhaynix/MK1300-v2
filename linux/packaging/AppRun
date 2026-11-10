@@ -1,19 +1,14 @@
 #!/bin/bash
 set -e
 
-# ---------------------------------------------------------
-# Ant Esports MK1300 V2 Linux Desktop Application AppRun
-# ---------------------------------------------------------
+# Keyboard Studio AppImage entrypoint
 
-# Determine AppDir path
 HERE="$(dirname "$(readlink -f "${0}")")"
 export APPDIR="${HERE}"
 
-# Prioritize bundled libraries (Flutter engine, Dart runtime, bundled hidapi)
-export LD_LIBRARY_PATH="${APPDIR}/lib:${LD_LIBRARY_PATH}"
+# Prefer bundled libraries (Flutter engine and hidapi)
+export LD_LIBRARY_PATH="${APPDIR}/lib:${LD_LIBRARY_PATH:-}"
 
-# Include AppDir data directories
-export XDG_DATA_DIRS="${APPDIR}/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+export XDG_DATA_DIRS="${APPDIR}/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 
-# Execute the application binary
-exec "${APPDIR}/mk1300_v2" "$@"
+exec "${APPDIR}/keyboard_studio" "$@"
